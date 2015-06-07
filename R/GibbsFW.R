@@ -75,5 +75,5 @@ setwd(current.dir)
 return(postMean=postMean)
 }
 
-.onUnload<-function(libpath){library.dynam.unload("GibbsFW",libpath)}
+.onUnload<-function(libpath){library.dynam.unload("GibbsFWjags",libpath)}
 

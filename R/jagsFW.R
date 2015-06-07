@@ -15,8 +15,8 @@ dfp<-5
 dfb<-5
 S<-0.5*Vy*(df+2)  
 Sg<-0.25*Vy*(dfg+2)
-Sb<-0.5*Vy*(dfb+2)  
-Sp<-0.5*Vy*(dfp+2)
+Sb<-0.5*sqrt(Vy)*(dfb+2)  
+Sp<-0.5*sqrt(Vy)*(dfp+2)
 
 for (i in 1 : n) {
       y[i] ~ dnorm(mu+g[IDL[i]]+h[IDE[i]]*(1+b[IDL[i]]),tau_e)
@@ -54,8 +54,8 @@ dfp<-5
 dfb<-5
 S<-0.5*Vy*(df+2)  
 Sg<-0.25*Vy*(dfg+2)
-Sb<-0.125*Vy*(dfb+2)  
-Sp<-0.125*Vy*(dfp+2)
+Sb<-0.5*sqrt(Vy)*(dfb+2)  
+Sp<-0.5*sqrt(Vy)*(dfp+2)
 
 for (i in 1 : n) {
       y[i] ~ dnorm(mu+g[IDL[i]]+h[IDE[i]]*(1+b[IDL[i]]),tau_e)

@@ -122,16 +122,21 @@ SEXP C_GibbsFW(SEXP R_y, SEXP R_IDL, SEXP R_IDE, SEXP R_g, SEXP R_b, SEXP R_h, S
 	if(ISNAN(L[0])){
 		//Rprintf("start Gibbs sampler, mu:%.2f, var_e:%.2f, var_g:%.2f:, var_h:%.2f,var_b:%.2f,g[0]:%.2f,b[0]:%.2f,h[0]:%.2f\n",mu[0],var_e,var_g,var_b,var_h,g[0],b[0],h[0]);
 		for(i=0; i<nIter;i++){
-			//sample environment effect h
-			for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
-			sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
+		
+		//sample environment effect h before b and g
+		//for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
+		//sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
 	   
-	    	//sample b and g separately;
-				//sample  b
+	    //sample b and g separately;
+		//sample  b
 			for(j=0;j<n;j++) X[j]=h[C_IDE[j]];
 			sample_beta_ID(b,e,C_IDL,X,n,ng,var_e,var_b);
 				//sample  g
 			sample_beta_ID_x1(g,e,C_IDL,n,ng,var_e,var_g);
+		
+		//sample environment effect h after b and g
+		for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
+		sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
 		
 		/*	//sample b and g together
 			double tXX;

@@ -1,15 +1,15 @@
 #this is the Gibbs sampler written in C. R is just a wrapper.
 GibbsFW=function(y,IDL,IDE,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,dfh=5,dfb=5,S=NULL,Sg=NULL,Sb=NULL,Sh=NULL,A=NULL,inits=NULL,nchain=1,seed=NULL){
             		
-	current.dir=getwd()	
-	if(!file.exists(savedir)){dir.create(savedir)}	
-	setwd(savedir)
-	#hyper parameters:
-	if(is.null(S)) S<-0.5*var(y)*(df+2)  #S is the scale times df
-	if(is.null(Sg))Sg<-0.25*var(y)*(dfg+2)
-	if(is.null(Sb))Sb<-0.5*var(y)*(dfb+2)  
-	if(is.null(Sh))Sh<-0.5*var(y)*(dfh+2)
-	if(!is.null(A)){L<-t(chol(A)); Linv=solve(L)}else {L<-NA;Linv=NA}
+  if(!file.exists(savedir)){dir.create(savedir)}  
+  setwd(savedir)
+  #hyper parameters:
+  var_y=var(y)
+  if(is.null(S)) S<-0.5*var_y*(df+2)  #S is the scale times df
+  if(is.null(Sg))Sg<-0.25*var_y*(dfg+2)
+  if(is.null(Sb))Sb<-0.5*sqrt(var_y)*(dfb+2)   
+  if(is.null(Sh))Sh<-0.5*sqrt(var_y)*(dfh+2)  
+  if(!is.null(A)){L<-t(chol(A)); Linv=solve(L)}else {L<-NA;Linv=NA}
 ############################################# 
 # initialize
 ########################################################################################## 

@@ -124,8 +124,8 @@ SEXP C_GibbsFW(SEXP R_y, SEXP R_IDL, SEXP R_IDE, SEXP R_g, SEXP R_b, SEXP R_h, S
 		for(i=0; i<nIter;i++){
 		
 		//sample environment effect h before b and g
-		//for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
-		//sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
+		for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
+		sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
 	   
 	    //sample b and g separately;
 		//sample  b
@@ -135,8 +135,8 @@ SEXP C_GibbsFW(SEXP R_y, SEXP R_IDL, SEXP R_IDE, SEXP R_g, SEXP R_b, SEXP R_h, S
 			sample_beta_ID_x1(g,e,C_IDL,n,ng,var_e,var_g);
 		
 		//sample environment effect h after b and g
-		for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
-		sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
+		//for(j=0;j<n;j++)X[j]=(1.0+b[C_IDL[j]]);
+		//sample_beta_ID(h,e,C_IDE,X,n,nh,var_e,var_h);
 		
 		/*	//sample b and g together
 			double tXX;

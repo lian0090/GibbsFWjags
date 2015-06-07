@@ -94,6 +94,7 @@ inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,jags.seed=seed,nchain=nc
 
 
 jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n.adapt=n.adapt)
+#list the sampling order for jags 
 #list.samplers(jags.m)
 samps<-coda.samples(jags.m,parameters,n.iter=nIter,thin=thin)
 save(samps,file=file.path(savedir,paste("samps.rda",sep="")))

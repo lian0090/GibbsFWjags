@@ -199,7 +199,7 @@ SEXP C_GibbsFW(SEXP R_y, SEXP R_IDL, SEXP R_IDE, SEXP R_g, SEXP R_b, SEXP R_h, S
 			var_g=SS/rchisq(DF);
 
 			//sample intercept
-			mu[0]=100
+			mu[0]=100;
 			//sample_mu(mu,e,var_e,n);
         	//posteria means
 			if(i>=(burnIn-1)){

@@ -16,7 +16,7 @@ GibbsFW=function(y,IDL,IDE,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,d
 	if((!is.integer(IDE)) | (!is.integer(IDL))){stop("IDE and IDL must be integers")}
 	ng=length(unique(IDL))
 	nh=length(unique(IDE))
-	inits=initialize(y,ng=ng,nh=nh,model="Gibbs",inits=inits,jags.seed=seed,nchain=nchain)
+	inits=initialize(y,ng=ng,nh=nh,model="Gibbs",inits=inits,seed=seed,nchain=nchain)
 	
   
 ############################################# 

@@ -10,7 +10,7 @@ initialize=function(y,ng,nh,model,inits=NULL,jags.seed=NULL,nchain=1){
 		}
 	else if(model=="jags"){
 		default_inits=list(
-			list(mu=mean(y),g=rep(0,ng),b=rep(0,ng),h=rep(0,nh),tau_e=1/sd_y,tau_g=1/sd_y, tau_b=1/sd_y, tau_h=1/sd_y, .RNG.seed=seed, .RNG.name="base::Mersenne-Twister")
+			list(mu=mean(y),g=rep(0,ng),b=rep(0,ng),h=rep(0,nh),tau_e=1/sd_y,tau_g=1/sd_y, tau_b=1/sd_y, tau_h=1/sd_y, .RNG.seed=jags.seed, .RNG.name="base::Mersenne-Twister")
 			)
 	}else{
 		stop("model must either be Gibbs or jags")

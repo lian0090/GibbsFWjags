@@ -95,7 +95,7 @@ jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n
 #list the sampling order for jags 
 #list.samplers(jags.m)
 samps<-coda.samples(jags.m,parameters,n.iter=nIter,thin=thin)
-save(samps,file=file.path(savedir,paste("samps.rda",sep="")))
+save(samps,file=file.path(savedir,paste("jags_samps.rda",sep="")))
 ans=list()
 for(i in 1:nchain){
 	
@@ -106,12 +106,17 @@ for(i in 1:nchain){
 	postMean$b=tmp[paste("b[",1:data$ng,"]",sep="")]
 	postMean$g=tmp[paste("g[",1:data$ng,"]",sep="")]
 	postMean$mu=tmp['mu']
+  postMean$var_b=tmp['var_b']
+  postMean$var_h=tmp['var_h']
+  postMean$var_g=tmp['var_g']
+  postMean$var_e=tmp['var_e']
 	#save(postMean,file=file.path(savedir,paste("postMeanInit",i,".rda",sep="")))
 ans[[i]]=postMean
 }
 names(ans)=paste("Init",c(1:length(inits)),sep="")
 file.remove(modelfile)
-save(ans,file=file.path(savedir,"postMean_jags.rda"))
+postMean=ans
+save(postMean,file=file.path(savedir,"postMean_jags.rda"))
 return(ans)
 #if(length(inits)>1){return(gelman.diag(samps))}
 }

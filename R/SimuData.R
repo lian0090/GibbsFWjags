@@ -107,10 +107,12 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   IDL=dat$IDL
   IDE=dat$IDE
   
-  if(runModels==T) {		ub.sum=fitmodel(y=y,IDL=IDL,IDE=IDE,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=NULL,savedir=file.path(savedir,ub),realizedValue=realizedValue)
+  if(runModels==T) {		
+    ub.sum=fitmodel(y=y,IDL=IDL,IDE=IDE,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=NULL,savedir=file.path(savedir,ub),realizedValue=realizedValue)
                       colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
                       corr=cbind(balance.sum,ub.sum)	
-                      save(corr,file=file.path(savedir,"corr.rda"))}		
+                      save(corr,file=file.path(savedir,"corr.rda"))
+  }		
   return(corr)
 }
 

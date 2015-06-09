@@ -47,7 +47,7 @@ GibbsFW=function(y,IDL,IDE,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,d
 			file.remove(sampFile)
 		}	
 		samps=mcmc.list(samps);	
-		if(save_samps==TRUE){save(samps,file="samps.rda")}
+		if(save_samps==TRUE){save(samps,file="Gibbs_samps.rda")}
 		#mpsrf=gelman.diag(samps)$mpsrf
 		#return(list(postMean=postMean,mpsrf=mpsrf))
 		return(list(postMean=postMean))

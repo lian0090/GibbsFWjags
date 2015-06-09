@@ -66,6 +66,7 @@ corYhat=function(Param1=NULL,Param2=NULL,IDL,IDE){
 	getyhat=function(Param,IDL,IDE){
 	IDL=as.integer(IDL)
 	IDE=as.integer(IDE)	
+  ##only unique levels of IDL and IDE combinations are kept
 	yhat=data.frame(aggregate(Param$g[IDL]+(1+Param$b[IDL])*Param$h[IDE],by=list(IDL,IDE),mean))[,3]
     if("mu" %in% names(Param)){yhat=yhat+Param$mu}
     return(yhat)
@@ -81,13 +82,7 @@ summaryCor=function(IDL,IDE,realizedValue,predictedValue){
     n.IDE=length(unique(IDE))
     extend.IDL=rep(1:n.IDL,each=n.IDE)
     extend.IDE=rep(1:n.IDE,n.IDL)
-    if(length(unique(paste(IDL,IDE)))<length(extend.IDL)){
-    	predict.group=setdiff(paste(extend.IDL,extend.IDE,sep="_"),paste(IDL,IDE,sep="_"))
-    	predict.IDL=as.integer(gsub("_.*","",predict.group))
-   		predict.IDE=as.integer(gsub(".*_","",predict.group))
-		corr[5]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=predict.IDL,IDE=predict.IDE)  
-    	corr[6]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=extend.IDL,IDE=extend.IDE) 
-    	}
+ 
 	
 	#dat is a data.frame with the IDL and IDE combinations in the data set
 	corr[1]=cor(realizedValue$b,predictedValue$b)
@@ -95,7 +90,15 @@ summaryCor=function(IDL,IDE,realizedValue,predictedValue){
     corr[3]=cor(realizedValue$h,predictedValue$h)
     corr[4]= corYhat(Param1=realizedValue,Param2=predictedValue,IDL=IDL,IDE=IDE)
 	names(corr)=c("b","g","h","yhat","predicted yhat only","extended yhat")
-	return(corr)	
+		
+	if(length(unique(paste(IDL,IDE)))<length(extend.IDL)){
+	  predict.group=setdiff(paste(extend.IDL,extend.IDE,sep="_"),paste(IDL,IDE,sep="_"))
+	  predict.IDL=as.integer(gsub("_.*","",predict.group))
+	  predict.IDE=as.integer(gsub(".*_","",predict.group))
+	  corr[5]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=predict.IDL,IDE=predict.IDE)  
+	  corr[6]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=extend.IDL,IDE=extend.IDE) 
+	}
+	return(corr)
 }
 
 

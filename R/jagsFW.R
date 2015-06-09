@@ -90,7 +90,7 @@ parameters<-c("mu","g","b","h","var_g","var_b","var_h","var_e")
 ############################################# 
 # initialize
 ########################################################################################## 
-inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,jags.seed=seed,nchain=nchain)
+inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,seed=seed,nchain=nchain)
 jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n.adapt=n.adapt)
 #list the sampling order for jags 
 #list.samplers(jags.m)

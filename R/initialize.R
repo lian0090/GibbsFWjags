@@ -1,5 +1,5 @@
 #initialize
-initialize=function(y,ng,nh,model,inits=NULL,jags.seed=NULL,nchain=1){
+initialize=function(y,ng,nh,model,inits=NULL,seed=NULL,nchain=1){
 	#seed is to set the random seed for Gibbs Sampler for jags. Not for the random seed of inital values.
 	var_y=var(y,na.rm=T)
 	sd_y=sqrt(var_y)
@@ -10,7 +10,7 @@ initialize=function(y,ng,nh,model,inits=NULL,jags.seed=NULL,nchain=1){
 		}
 	else if(model=="jags"){
 		default_inits=list(
-			list(mu=mean(y),g=rep(0,ng),b=rep(0,ng),h=rep(0,nh),tau_e=1/sd_y,tau_g=1/sd_y, tau_b=1/sd_y, tau_h=1/sd_y, .RNG.seed=jags.seed, .RNG.name="base::Mersenne-Twister")
+			list(mu=mean(y),g=rep(0,ng),b=rep(0,ng),h=rep(0,nh),tau_e=1/sd_y,tau_g=1/sd_y, tau_b=1/sd_y, tau_h=1/sd_y, .RNG.seed=seed, .RNG.name="base::Mersenne-Twister")
 			)
 	}else{
 		stop("model must either be Gibbs or jags")
@@ -43,7 +43,7 @@ initialize=function(y,ng,nh,model,inits=NULL,jags.seed=NULL,nchain=1){
             		set.seed(wh.null[i])
             		if(model=="Gibbs"){
             			inits[[(wh.null[i])]]=list(mu=rnorm(1,mean(y),var_y/2), g=rnorm(ng, 0, var_y/4), b=rnorm(ng, 0, var_y/2), h=rnorm(nh,0,var_y/2), var_e=var_y/2, var_g=var_y/4, var_b=var_y/2, var_h=var_y/2)}else if(model=="jags"){
-            			inits[[(wh.null[i])]]=list(mu=rnorm(1,mean(y),var_y/2), g=rnorm(ng, 0, var_y/4), b=rnorm(ng, 0, var_y/2), h=rnorm(nh,0,var_y/2), tau_e=2/var_y, tau_g=4/var_y, tau_b=2/var_y, tau_h=2/var_y, .RNG.seed=jags.seed, .RNG.name="base::Mersenne-Twister")
+            			inits[[(wh.null[i])]]=list(mu=rnorm(1,mean(y),var_y/2), g=rnorm(ng, 0, var_y/4), b=rnorm(ng, 0, var_y/2), h=rnorm(nh,0,var_y/2), tau_e=2/var_y, tau_g=4/var_y, tau_b=2/var_y, tau_h=2/var_y, .RNG.seed=seed, .RNG.name="base::Mersenne-Twister")
             	}
             }	
     	}

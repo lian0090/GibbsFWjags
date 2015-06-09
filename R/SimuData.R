@@ -8,7 +8,7 @@ fitmodel=function(y,IDL,IDE,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,s
         predictedValue=GibbsFW(y=y,IDL=IDL,IDE=IDE,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
       }else
         if(modeli=="jags"){
-          predictedValue = jagsFW(y=y,IDL=IDL,IDE=IDE,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=burnIn,seed=seed,savedir=savedir)[[1]];
+          predictedValue = jagsFW(y=y,IDL=IDL,IDE=IDE,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
         }else{
           error("no model:",modeli)
         }
@@ -26,7 +26,7 @@ fitmodel=function(y,IDL,IDE,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,s
 #########################################################
 #simulate data
 #########################################################
-SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,burnIn=1000,nIter=5000,thin=thin,model){
+SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL){
   #model can be jags, Gibbs, lm
   #parameters is a list with var_g,var_b,var_h,var_e,ng,nh,nrep,mu,and(or) A.
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
@@ -63,7 +63,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))
   save(dat,file=file.path(savedir,"balance/dat.rda"))
   if(runModels==T) {
-    balance.sum=fitmodel(y=y, IDL=IDL, IDE=IDE,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=NULL,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
+    balance.sum=fitmodel(y=y, IDL=IDL, IDE=IDE,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
     colnames(balance.sum)=paste("balance",colnames(balance.sum),sep="_")
   }
   if(! ub %in% c("halfENV","halfVAR","random")){
@@ -108,7 +108,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   IDE=dat$IDE
   
   if(runModels==T) {		
-    ub.sum=fitmodel(y=y,IDL=IDL,IDE=IDE,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=NULL,savedir=file.path(savedir,ub),realizedValue=realizedValue)
+    ub.sum=fitmodel(y=y,IDL=IDL,IDE=IDE,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
                       colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
                       corr=cbind(balance.sum,ub.sum)	
                       save(corr,file=file.path(savedir,"corr.rda"))

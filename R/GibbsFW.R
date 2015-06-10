@@ -1,4 +1,4 @@
-GibbsFW=function(y,VAR,ENV,VARlevels,ENVlevels,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,dfh=5,dfb=5,S=NULL,Sg=NULL,Sb=NULL,Sh=NULL,A=NULL,inits=NULL,nchain=1,seed=NULL){
+GibbsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,dfh=5,dfb=5,S=NULL,Sg=NULL,Sb=NULL,Sh=NULL,A=NULL,inits=NULL,nchain=1,seed=NULL){
   
   current.dir=getwd()  
   if(!file.exists(savedir)){dir.create(savedir)}	

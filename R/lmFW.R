@@ -1,5 +1,5 @@
 #this is the code for ordinary linear regression
-lmFW=function(y,VAR,ENV,VARlevels,ENVlevels,savedir="."){
+lmFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir="."){
   IDEL=getIDEL(VAR,ENV,VARlevels,ENVlevels)
   IDE=IDEL$IDE
   IDL=IDEL$IDL

@@ -51,7 +51,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   VAR=as.character(rep(c(1:ng),each=nh*nrep))
   ENV=as.character(rep(rep(c(1:nh),each=nrep),ng))
   
-  IDEL=getIDEL(VAR,ENV)
+  IDEL=getIDEL(VAR,ENV,VARlevels=NULL,ENVlevels=NULL)
   IDE=IDEL$IDE
   IDL=IDEL$IDL
   VARlevels=IDEL$VARlevels
@@ -71,7 +71,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))
   save(dat,file=file.path(savedir,"balance/dat.rda"))
   if(runModels==T) {
-    balance.sum=fitmodel(y=y, VAR=VAR, ENV=ENV,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
+    balance.sum=fitmodel(y=y, VAR=VAR, ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
     colnames(balance.sum)=paste("balance",colnames(balance.sum),sep="_")
   }
   if(! ub %in% c("halfENV","halfVAR","random")){
@@ -113,7 +113,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   save(dat,file=file.path(savedir,ub,"dat.rda"))
   
   if(runModels==T) {		
-    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
+    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
                       colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
                       corr=cbind(balance.sum,ub.sum)	
                       save(corr,file=file.path(savedir,"corr.rda"))

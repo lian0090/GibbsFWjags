@@ -97,12 +97,13 @@ parameters<-c("mu","g","b","h","var_g","var_b","var_h","var_e")
 ########################################################################################## 
 inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,seed=seed,nchain=nchain)
 jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n.adapt=n.adapt)
+lapply(inits,function(a)cat("seed",a$.RNG.seed,"\n"))
 #list the sampling order for jags 
 fnlist <- function(x,file){ z <- deparse(substitute(x))
                        cat(z, "\n",file=file)
                        nams=names(x) 
                        for (i in seq_along(x) ) cat(nams[i],  x[[i]], "\n",file=file,append=T)}
-fnlist(list.samplers(jags.m),file=file.path("jagsSampler.txt"))
+fnlist(list.samplers(jags.m),file=file.path(savedir,"jagsSampler.txt"))
 samps<-coda.samples(jags.m,parameters,n.iter=nIter,thin=thin)
 save(samps,file=file.path(savedir,paste("jags_samps.rda",sep="")))
 ans=list()

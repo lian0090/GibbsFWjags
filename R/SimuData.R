@@ -2,7 +2,7 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,bu
   corr=NULL
   for(modeli in model){
     if(modeli=="lm"){
-      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels)
+      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels,savedir=savedir)
     }else
       if(modeli=="Gibbs"){
         predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];

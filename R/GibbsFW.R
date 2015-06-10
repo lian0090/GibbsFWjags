@@ -41,6 +41,7 @@ GibbsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir=".",nIter=1000,
       var_b=inits[[i]]$var_b
       var_h=inits[[i]]$var_h
       if(!is.null(seed)){set.seed(seed)}
+      cat("seed before starting Gibbs Sampler is ", seed, "\n")
       postMean[[i]]  =.Call("C_GibbsFW", y, IDL, IDE, g, b, h, nIter, burnIn, thin, sampFile,S, Sg, Sb, Sh, df, dfg, dfb, dfh, var_e, var_g, var_b, var_h, mu, as.vector(L), as.vector(Linv))
       names(postMean[[i]])=c("mu","var_g","var_b","var_h","var_e","g","b","h");
       names(postMean[[i]]$g)=VARlevels

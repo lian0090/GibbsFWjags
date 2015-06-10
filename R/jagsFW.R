@@ -98,7 +98,7 @@ parameters<-c("mu","g","b","h","var_g","var_b","var_h","var_e")
 inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,seed=seed,nchain=nchain)
 jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n.adapt=n.adapt)
 #list the sampling order for jags 
-#list.samplers(jags.m)
+print(list.samplers(jags.m),file=file.path(savedir,"jagsSampler.txt"))
 samps<-coda.samples(jags.m,parameters,n.iter=nIter,thin=thin)
 save(samps,file=file.path(savedir,paste("jags_samps.rda",sep="")))
 ans=list()
@@ -110,6 +110,9 @@ for(i in 1:nchain){
 	postMean$h=tmp[paste("h[",1:data$nh,"]",sep="")]
 	postMean$b=tmp[paste("b[",1:data$ng,"]",sep="")]
 	postMean$g=tmp[paste("g[",1:data$ng,"]",sep="")]
+  names(postMean$h)=ENVlevels
+  names(postMean$g)=VARlevels
+  names(postMean$b)=VARlevels
 	postMean$mu=tmp['mu']
   postMean$var_b=tmp['var_b']
   postMean$var_h=tmp['var_h']

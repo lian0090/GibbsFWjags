@@ -23,7 +23,7 @@ GibbsFW=function(y,VAR,ENV,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,d
   IDE=as.numeric(fENV)
   ng=length(VARlevels)
   nh=length(ENVlevels)
-  inits=initialize(y,ng=ng,nh=nh,model="Gibbs",inits=inits,jags.seed=seed,nchain=nchain)
+  inits=initialize(y,ng=ng,nh=nh,model="Gibbs",inits=inits,seed=seed,nchain=nchain)
   
   
   ############################################# 

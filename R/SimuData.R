@@ -2,10 +2,10 @@ fitmodel=function(y,IDL,IDE,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,s
   corr=NULL
   for(modeli in model){
     if(modeli=="lm"){
-      predictedValue=FWlm(y,IDL,IDE)
+      predictedValue=lmFW(y,IDL,IDE)
     }else
       if(modeli=="Gibbs"){
-        predictedValue=GibbsFW(y=y,IDL=IDL,IDE=IDE,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
+        predictedValue=GibbsFW(y=y,VAR=IDL,ENV=IDE,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
       }else
         if(modeli=="jags"){
           predictedValue = jagsFW(y=y,IDL=IDL,IDE=IDE,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];

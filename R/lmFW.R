@@ -5,6 +5,7 @@ lmFW=function(y,VAR,ENV,savedir="."){
   IDL=IDEL$IDL
   VARlevels=IDEL$VARlevels
   ENVlevels=IDEL$ENVlevels
+  fVAR=IDEL$fVAR
   h=tapply(y,INDEX=IDE,mean)-mean(y)
   n.var=length(VARlevels)
   ZX=sweep(model.matrix(~fVAR-1),1,h[IDE],"*")

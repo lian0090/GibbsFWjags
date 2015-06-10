@@ -80,6 +80,8 @@ getIDEL=function(VAR,ENV){
   out$IDE=IDE
   out$VARlevels=VARlevels
   out$ENVlevels=ENVlevels
+  out$fVAR=fVAR
+  out$fENV=fENV
   return(out)
 }
 

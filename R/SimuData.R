@@ -48,20 +48,23 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   h=rnorm(nh,0,sd=sqrt(var_h));
   e=rnorm(ng*nh*nrep,0,sd=sqrt(var_e));	
   #line effect
+  VAR=as.character(rep(c(1:ng),each=nh*nrep))
+  ENV=as.character(rep(rep(c(1:nh),each=nrep),ng))
+  
   IDEL=getIDEL(VAR,ENV)
   IDE=IDEL$IDE
   IDL=IDEL$IDL
   VARlevels=IDEL$VARlevels
   ENVlevels=IDEL$ENVlevels
-  
+  names(g)=VARlevels
+  names(h)=ENVlevels
+  names(b)=VARlevels
   y=mu+g[IDL]+h[IDE]+b[IDL]*h[IDE]+e
   
   dat=data.frame(y)
   dat$VAR=VAR
   dat$ENV=ENV
-  names(g)=VARlevels
-  names(h)=ENVlevels
-  names(b)=VARlevels
+
   realizedValue=list(mu=mu,g=g,h=h,b=b,var_g=var(g),var_h=var(h),var_b=var(b),var_e=var(e))
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
   if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))

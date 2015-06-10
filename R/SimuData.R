@@ -5,10 +5,11 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,bu
       predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels,savedir=savedir)
     }else
       if(modeli=="Gibbs"){
-        predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
+        predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
       }else
         if(modeli=="jags"){
-          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
+          #jags will start sampling from the last member to the first member
+          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=rev(VARlevels),ENVlevels=rev(ENVlevels),Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
         }else{
           error("no model:",modeli)
         }

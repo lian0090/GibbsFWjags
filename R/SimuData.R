@@ -58,7 +58,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   names(g)=c(1:ng)
   names(h)=c(1:nh)
   names(b)=c(1:ng)
-  realizedValue=list(mu=mu,g=g,h=h,b=b,var_g=var(g),var_p=var(h),var_b=var(b),var_e=var(e))
+  realizedValue=list(mu=mu,g=g,h=h,b=b,var_g=var(g),var_h=var(h),var_b=var(b),var_e=var(e))
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
   if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))
   save(dat,file=file.path(savedir,"balance/dat.rda"))

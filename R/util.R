@@ -151,7 +151,7 @@ getyhat=function(Param,VAR,ENV){
   VAR=as.character(VAR)
   ENV=as.character(ENV)
   ##only unique levels of IDL and IDE combinations are kept
-  yhat=data.frame(aggregate(Param$g[VAR]+(1+Param$b[ENV])*Param$h[ENV],by=list(VAR,ENV),mean))[,3]
+  yhat=data.frame(aggregate(Param$g[VAR]+(1+Param$b[VAR])*Param$h[ENV],by=list(VAR,ENV),mean))[,3]
   if("mu" %in% names(Param)){yhat=yhat+Param$mu}
   return(yhat)
 }
@@ -166,11 +166,12 @@ corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
 
 summaryCor=function(VAR,ENV,realizedValue,predictedValue){
 	corr=rep(0,6)
-
-	n.VAR=length(VARlevels)
-  n.ENV=length(ENVlevels)
-  extend.VAR=rep(VARlevels,each=n.ENV)
-  extend.ENV=rep(ENVlevels,n.VAR)
+  uniqVAR=unique(VAR)
+  uniqENV=unique(ENV)
+	n.VAR=length(uniqVAR)
+  n.ENV=length(uniqENV)
+  extend.VAR=rep(uniqVAR,each=n.ENV)
+  extend.ENV=rep(uniqENV,n.VAR)
   
   #dat is a data.frame with the IDL and IDE combinations in the data set
 	  corr[1]=cor(realizedValue$b,predictedValue$b)

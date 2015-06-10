@@ -66,7 +66,22 @@ print.FW=function(FWobj){
 }
 
 
-
+getIDEL=function(VAR,ENV){
+  VAR=as.character(VAR)
+  ENV=as.character(ENV)
+  VARlevels=sort(unique(VAR))
+  ENVlevels=sort(unique(ENV))
+  fVAR=factor(VAR,levels=VARlevels,ordered=T)
+  fENV=factor(ENV,levels=ENVlevels,ordered=T)
+  IDL=as.numeric(fVAR)
+  IDE=as.numeric(fENV)
+  out=list()
+  out$IDL=IDL
+  out$IDE=IDE
+  out$VARlevels=VARlevels
+  out$ENVlevels=ENVlevels
+  return(out)
+}
 
 ####################################################################################
 ### other plot functions 
@@ -130,44 +145,44 @@ summaryplot=function(IDL,IDE,realizedValue,postMean,LSvalue,plotdir,samps){
 }
 
 ##function to produce summary correlations
-getyhat=function(Param,IDL,IDE){
-  IDL=as.integer(IDL)
-  IDE=as.integer(IDE)	
+getyhat=function(Param,VAR,ENV){
+  VAR=as.character(VAR)
+  ENV=as.character(ENV)
   ##only unique levels of IDL and IDE combinations are kept
-  yhat=data.frame(aggregate(Param$g[IDL]+(1+Param$b[IDL])*Param$h[IDE],by=list(IDL,IDE),mean))[,3]
+  yhat=data.frame(aggregate(Param$g[VAR]+(1+Param$b[ENV])*Param$h[ENV],by=list(VAR,ENV),mean))[,3]
   if("mu" %in% names(Param)){yhat=yhat+Param$mu}
   return(yhat)
 }
 
-corYhat=function(Param1=NULL,Param2=NULL,IDL,IDE){
+corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
 	
 
-    return(cor(getyhat(Param1,IDL,IDE),getyhat(Param2,IDL,IDE)))
+    return(cor(getyhat(Param1,VAR,ENV),getyhat(Param2,VAR,ENV)))
 
 }
 
 
-summaryCor=function(IDL,IDE,realizedValue,predictedValue){
+summaryCor=function(VAR,ENV,realizedValue,predictedValue){
 	corr=rep(0,6)
-	n.IDL=length(unique(IDL))
-    n.IDE=length(unique(IDE))
-    extend.IDL=rep(1:n.IDL,each=n.IDE)
-    extend.IDE=rep(1:n.IDE,n.IDL)
- 
-	
-	#dat is a data.frame with the IDL and IDE combinations in the data set
-	corr[1]=cor(realizedValue$b,predictedValue$b)
+
+	n.VAR=length(VARlevels)
+  n.ENV=length(ENVlevels)
+  extend.VAR=rep(VARlevels,each=n.ENV)
+  extend.ENV=rep(ENVlevels,n.VAR)
+  
+  #dat is a data.frame with the IDL and IDE combinations in the data set
+	  corr[1]=cor(realizedValue$b,predictedValue$b)
     corr[2]=cor(realizedValue$g,predictedValue$g)
     corr[3]=cor(realizedValue$h,predictedValue$h)
-    corr[4]= corYhat(Param1=realizedValue,Param2=predictedValue,IDL=IDL,IDE=IDE)
+    corr[4]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=VAR,ENV=ENV)
 	names(corr)=c("b","g","h","yhat","predicted yhat only","extended yhat")
 		
-	if(length(unique(paste(IDL,IDE)))<length(extend.IDL)){
-	  predict.group=setdiff(paste(extend.IDL,extend.IDE,sep="_"),paste(IDL,IDE,sep="_"))
-	  predict.IDL=as.integer(gsub("_.*","",predict.group))
-	  predict.IDE=as.integer(gsub(".*_","",predict.group))
-	  corr[5]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=predict.IDL,IDE=predict.IDE)  
-	  corr[6]=corYhat(Param1=realizedValue,Param2=predictedValue,IDL=extend.IDL,IDE=extend.IDE) 
+	if(length(unique(paste(VAR,ENV)))<length(extend.VAR)){
+	  predict.group=setdiff(paste(extend.VAR,extend.ENV,sep="_"),paste(VAR,ENV,sep="_"))
+	  predict.VAR=gsub("_.*","",predict.group)
+	  predict.ENV=gsub(".*_","",predict.group)
+	  corr[5]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=predict.VAR,ENV=predict.ENV)  
+	  corr[6]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=extend.VAR,ENV=extend.ENV) 
 	}
 	return(corr)
 }

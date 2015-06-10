@@ -1,6 +1,11 @@
 ##this is the baysian implementation with rjags
-jagsFW=function(y,IDL,IDE,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
+jagsFW=function(y,VAR,ENV,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
 n=length(y)
+IDEL=getIDEL(VAR,ENV)
+IDE=IDEL$IDE
+IDL=IDEL$IDL
+VARlevels=IDEL$VARlevels
+ENVlevels=IDEL$ENVlevels
 ng=length(unique(IDL))
 nh=length(unique(IDE))
 data=list(y=y,ng=ng,nh=nh,n=n,IDL=IDL,IDE=IDE,
@@ -110,12 +115,14 @@ for(i in 1:nchain){
   postMean$var_h=tmp['var_h']
   postMean$var_g=tmp['var_g']
   postMean$var_e=tmp['var_e']
+	class(postMean)=c("FW","list")
 	#save(postMean,file=file.path(savedir,paste("postMeanInit",i,".rda",sep="")))
 ans[[i]]=postMean
 }
 names(ans)=paste("Init",c(1:length(inits)),sep="")
 file.remove(modelfile)
 postMean=ans
+class(postMean)=c("postMean","list")
 save(postMean,file=file.path(savedir,"postMean_jags.rda"))
 return(ans)
 #if(length(inits)>1){return(gelman.diag(samps))}

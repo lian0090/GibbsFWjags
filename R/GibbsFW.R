@@ -13,14 +13,11 @@ GibbsFW=function(y,VAR,ENV,savedir=".",nIter=1000,burnIn=500,thin=1,df=5,dfg=5,d
   ############################################# 
   # initialize
   ########################################################################################## 
-  VAR=as.character(VAR)
-  ENV=as.character(ENV)
-  VARlevels=unique(VAR)
-  ENVlevels=unique(ENV)
-  fVAR=factor(VAR,levels=VARlevels,ordered=T)
-  fENV=factor(ENV,levels=ENVlevels,ordered=T)
-  IDL=as.numeric(fVAR)
-  IDE=as.numeric(fENV)
+  IDEL=getIDEL(VAR,ENV)
+  IDE=IDEL$IDE
+  IDL=IDEL$IDL
+  VARlevels=IDEL$VARlevels
+  ENVlevels=IDEL$ENVlevels
   ng=length(VARlevels)
   nh=length(ENVlevels)
   inits=initialize(y,ng=ng,nh=nh,model="Gibbs",inits=inits,seed=seed,nchain=nchain)

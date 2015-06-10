@@ -1,14 +1,14 @@
-fitmodel=function(y,VAR,ENV,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
+fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
   for(modeli in model){
     if(modeli=="lm"){
-      predictedValue=lmFW(y,VAR,ENV)
+      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels)
     }else
       if(modeli=="Gibbs"){
-        predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
+        predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
       }else
         if(modeli=="jags"){
-          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
+          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
         }else{
           error("no model:",modeli)
         }

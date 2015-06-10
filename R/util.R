@@ -178,9 +178,9 @@ summaryCor=function(VAR,ENV,realizedValue,predictedValue){
   extend.ENV=rep(uniqENV,n.VAR)
   
   #dat is a data.frame with the IDL and IDE combinations in the data set
-	  corr[1]=cor(realizedValue$b,predictedValue$b)
-    corr[2]=cor(realizedValue$g,predictedValue$g)
-    corr[3]=cor(realizedValue$h,predictedValue$h)
+	  corr[1]=cor(realizedValue$b[uniqVAR],predictedValue$b[uniqVAR])
+    corr[2]=cor(realizedValue$g[uniqVAR],predictedValue$g[uniqVAR])
+    corr[3]=cor(realizedValue$h[uniqENV],predictedValue$h[uniqENV])
     corr[4]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=VAR,ENV=ENV)
 	names(corr)=c("b","g","h","yhat","predicted yhat only","extended yhat")
 		

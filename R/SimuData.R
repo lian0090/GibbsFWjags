@@ -111,12 +111,9 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   
   if(!file.exists(file.path(savedir,ub))) dir.create(file.path(savedir,ub))
   save(dat,file=file.path(savedir,ub,"dat.rda"))
-  y=dat$y
-  IDL=dat$IDL
-  IDE=dat$IDE
   
   if(runModels==T) {		
-    ub.sum=fitmodel(y=y,VAR=VAR,ENV=ENV,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
+    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
                       colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
                       corr=cbind(balance.sum,ub.sum)	
                       save(corr,file=file.path(savedir,"corr.rda"))

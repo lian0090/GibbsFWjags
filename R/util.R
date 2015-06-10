@@ -66,11 +66,15 @@ print.FW=function(FWobj){
 }
 
 
-getIDEL=function(VAR,ENV){
+getIDEL=function(VAR,ENV,VARlevels=NULL,ENVlevels=NULL){
   VAR=as.character(VAR)
   ENV=as.character(ENV)
+  if(is.null(VARlevels)){
   VARlevels=sort(unique(VAR))
-  ENVlevels=sort(unique(ENV))
+  }
+  if(is.null(ENVlevels)){
+    ENVlevels=sort(unique(ENV))
+  }
   fVAR=factor(VAR,levels=VARlevels,ordered=T)
   fENV=factor(ENV,levels=ENVlevels,ordered=T)
   IDL=as.numeric(fVAR)

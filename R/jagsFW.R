@@ -1,7 +1,7 @@
 ##this is the baysian implementation with rjags
-jagsFW=function(y,VAR,ENV,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
+jagsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
 n=length(y)
-IDEL=getIDEL(VAR,ENV)
+IDEL=getIDEL(VAR,ENV,VARlevels,ENVlevels)
 IDE=IDEL$IDE
 IDL=IDEL$IDL
 VARlevels=IDEL$VARlevels
@@ -98,7 +98,11 @@ parameters<-c("mu","g","b","h","var_g","var_b","var_h","var_e")
 inits=initialize(y,ng=ng,nh=nh,model="jags",inits=inits,seed=seed,nchain=nchain)
 jags.m<-jags.model(file=modelfile,data=data,inits=inits,n.chains=length(inits),n.adapt=n.adapt)
 #list the sampling order for jags 
-print(list.samplers(jags.m),file=file.path(savedir,"jagsSampler.txt"))
+fnlist <- function(x,file){ z <- deparse(substitute(x))
+                       cat(z, "\n",file=file)
+                       nams=names(x) 
+                       for (i in seq_along(x) ) cat(nams[i],  x[[i]], "\n",file=file,append=T)}
+fnlist(list.samplers(jags.m),file=file.path("jagsSampler.txt"))
 samps<-coda.samples(jags.m,parameters,n.iter=nIter,thin=thin)
 save(samps,file=file.path(savedir,paste("jags_samps.rda",sep="")))
 ans=list()

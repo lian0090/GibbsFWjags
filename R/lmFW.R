@@ -16,8 +16,7 @@ lmFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir="."){
   names(g)=VARlevels
   names(b)=VARlevels
   names(h)=ENVlevels
-  fitted.values=g[IDL]+(1+b[IDL])*h[IDE]
-  LSvalue=list(mu=0,g=g,b=b,h=h,fitted.values=fitted.values,y=y,VARlevels=VARlevels,ENVlevels=ENVlevels,IDL=IDL,IDE=IDE)
+  LSvalue=setFW(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,IDL=IDL,IDE=IDE,VARlevels=VARlevels,ENVlevels=ENVlevels,mu=0) 
   class(LSvalue)=c("FW","list")
   save(LSvalue,file=file.path(savedir,"LSvalue.RData"))
   return(LSvalue)

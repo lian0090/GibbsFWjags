@@ -42,17 +42,15 @@ GibbsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir=".",nIter=1000,
       var_h=inits[[i]]$var_h
       if(!is.null(seed)){set.seed(seed)}
       cat("seed before starting Gibbs Sampler is ", seed, "\n")
-      postMean[[i]]  =.Call("C_GibbsFW", y, IDL, IDE, g, b, h, nIter, burnIn, thin, sampFile,S, Sg, Sb, Sh, df, dfg, dfb, dfh, var_e, var_g, var_b, var_h, mu, as.vector(L), as.vector(Linv))
-      names(postMean[[i]])=c("mu","var_g","var_b","var_h","var_e","g","b","h");
-      names(postMean[[i]]$g)=VARlevels
-      names(postMean[[i]]$b)=VARlevels
-      names(postMean[[i]]$h)=ENVlevels
-      postMean[[i]]$fitted.values=postMean[[i]]$g[IDL]+(1+postMean[[i]]$b[IDL])*postMean[[i]]$h[IDE]
-      postMean[[i]]$VARlevels=VARlevels
-      postMean[[i]]$ENVlevels=ENVlevels
-      postMean[[i]]$IDL=IDL
-      postMean[[i]]$IDE=IDE
-      class(postMean[[i]])=c("FW","list")
+      outi  =.Call("C_GibbsFW", y, IDL, IDE, g, b, h, nIter, burnIn, thin, sampFile,S, Sg, Sb, Sh, df, dfg, dfb, dfh, var_e, var_g, var_b, var_h, mu, as.vector(L), as.vector(Linv))
+      names(outi)=c("mu","var_g","var_b","var_h","var_e","g","b","h");
+      for(namej in names(outi)){
+        assign(namej,outi[[namej]])
+      }
+      names(g)=VARlevels
+      names(b)=VARlevels
+      names(h)=ENVlevels
+      postMean[[i]]=setFW(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,IDL=IDL,IDE=IDE,VARlevels=VARlevels,ENVlevels=ENVlevels,mu=mu,var_g=var_g,var_h=var_h,var_b=var_b,var_e=var_e)
     }
     names(postMean)=paste("Init",c(1:nchain),sep="")
     for(i in 1:nchain){

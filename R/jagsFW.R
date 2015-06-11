@@ -112,18 +112,13 @@ for(i in 1:nchain){
 	xi=samps[[i]][round(burnIn/thin):round(nIter/thin),,drop=F]
 	tmp=apply(xi,2,mean)
 	postMean=list()
-	postMean$h=tmp[paste("h[",1:data$nh,"]",sep="")]
-	postMean$b=tmp[paste("b[",1:data$ng,"]",sep="")]
-	postMean$g=tmp[paste("g[",1:data$ng,"]",sep="")]
-  names(postMean$h)=ENVlevels
-  names(postMean$g)=VARlevels
-  names(postMean$b)=VARlevels
-	postMean$mu=tmp['mu']
-  postMean$var_b=tmp['var_b']
-  postMean$var_h=tmp['var_h']
-  postMean$var_g=tmp['var_g']
-  postMean$var_e=tmp['var_e']
-	class(postMean)=c("FW","list")
+	h=tmp[paste("h[",1:data$nh,"]",sep="")]
+	b=tmp[paste("b[",1:data$ng,"]",sep="")]
+	g=tmp[paste("g[",1:data$ng,"]",sep="")]
+  names(h)=ENVlevels
+  names(g)=VARlevels
+  names(b)=VARlevels
+	postMean=setFW(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,IDL=IDL,IDE=IDE,VARlevels=VARlevels,ENVlevels=ENVlevels,mu=tmp['mu'],var_g=tmp['var_g'],var_e=tmp['var_e'],var_b=tmp['var_b'],var_h=tmp['var_h'])
 	#save(postMean,file=file.path(savedir,paste("postMeanInit",i,".rda",sep="")))
 ans[[i]]=postMean
 }

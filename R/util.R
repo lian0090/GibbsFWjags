@@ -27,7 +27,12 @@ plot.FW=function(FWobj,plotVAR=NULL,main=NULL){
   y=y[,3]
   uniqIDL=sort(as.numeric(unique(IDL)))
   n.IDL=length(uniqIDL)
-  plot(c(min(c(y,yhat)),max(c(y,yhat)))~ c(min(h),min(h)+(max(h)-min(h))*1.05),type="n",xlab="Environment values",ylab="Variety performance",main=main)
+  plot(c(min(c(y,yhat)),max(c(y,yhat)))~ c(min(h),min(h)+(max(h)-min(h))*1.05),type="n",xlab="",ylab="Variety performance",main=main)
+  sorth=sort(h)
+  sorth1=sorth[seq(1,length(h),by=2)]
+  sorth2=sorth[seq(2,length(h),by=2)]
+  axis(side=1,at=sorth1,labels=names(sorth1),line=1)
+  axis(side=3,at=sorth2,labels=names(sorth2),line=2)
   cols=NULL
   pchs=NULL
   for(i in 1:n.IDL){  
@@ -47,6 +52,7 @@ plot.FW=function(FWobj,plotVAR=NULL,main=NULL){
     points(y.i[order.E.i]~sortp.i,col=col,pch=pch)
     whmax=which.max(p.i)
     #text(x=min(p.i)+1.05*(max(p.i)-min(p.i)),y=y.i[whmax],labels=IDLi,col=col)
+    
   }
   sorth=sort(h[unique(IDE)])
   lines((sorth) ~ sorth, lty=2,col=1)
@@ -150,6 +156,24 @@ summaryplot=function(IDL,IDE,realizedValue,postMean,LSvalue,plotdir,samps){
 	system(paste("open plot.pdf"))
 }
 
+setFW=function(g,b,h,y,VAR,ENV,...){
+  eclipse=list(...)
+  fitted.values=g[VAR]+(1+b[VAR])*h[ENV]
+  ENVmean=aggregate(dat$y,by=list(ENV),mean)
+  nameENVmean=ENVmean[,1]
+  ENVmean=ENVmean[,2]
+  names(ENVmean)=nameENVmean
+  ENVmean=ENVmean[names(h)]
+  corENVmean=cor(ENVmean,h)
+  corfitted=cor(y,fitted.values)
+  cor_ymean=get_cor_ymean(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV)
+  out=list(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,ENVmean=ENVmean,corENVmean=corENVmean,corfitted=corfitted,cor_ymean=cor_ymean,fitted.values=fitted.values)
+  out=c(out,eclipse)	
+  class(out)=c("FW","list")
+  
+  return(out)
+  
+}
 ##function to produce summary correlations
 getyhat=function(Param,VAR,ENV){
   VAR=as.character(VAR)
@@ -166,6 +190,58 @@ corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
     return(cor(getyhat(Param1,VAR,ENV),getyhat(Param2,VAR,ENV)))
 
 }
+##
+get_cor_ymean=function(g,b,h,y,VAR,ENV,corOnly=T){
+  ymean=aggregate(y,by=list(VAR,ENV),mean)
+  VAR=ymean[,1]
+  ENV=ymean[,2]
+  ymean=ymean[,3]
+  yhat=g[VAR]+(1+b[VAR])*h[ENV]
+  return(cor(yhat,ymean))
+}
+partition_cor=function(FWobj,y_full,VAR_full,ENV_full,corOnly=T){
+  out=list()
+  g=FWobj$g
+  b=FWobj$b
+  h=FWobj$h
+  VAR_fitted=FWobj$VAR
+  ENV_fitted=FWobj$ENV
+  y_fitted=g[VAR_fitted]+(1+b[VAR_fitted])*h[ENV_fitted]
+  ymean_fitted=aggregate(y_fitted,by=list(VAR_fitted,ENV_fitted),mean)
+  VAR_fitted=ymean_fitted[,1]
+  ENV_fitted=ymean_fitted[,2]
+  IDEL=paste(VAR_fitted,ENV_fitted,sep="_")
+  ymean_full=aggregate(y_full,by=list(VAR_full,ENV_full),mean)
+  VAR_full=ymean_full[,1]
+  ENV_full=ymean_full[,2]
+  ymean_full=ymean_full[,3]
+  yhat_full=g[VAR_full]+(1+b[VAR_full])*h[ENV_full]
+  
+  isfitted= (paste(VAR_full,ENV_full,sep="_")  %in% IDEL)
+  which_predicted=which(!isfitted)
+  which_fitted=which(isfitted)
+  
+  ymean_predicted=ymean_full[which_predicted]
+  yhat_predicted=yhat_full[which_predicted]
+  ymean_fitted=ymean_full[which_fitted]
+  yhat_fitted=yhat_full[which_fitted]
+  
+  if(corOnly==F){
+  out$ymean_predicted= ymean_predicted
+  out$yhat_predicted=yhat_predicted
+  out$ymean_fitted=ymean_fitted
+  out$yhat_fitted=yhat_fitted
+  out$ymean_full=ymean_full
+  out$yhat_full=yhat_full
+  }
+  out$cor_yhat_full=cor(ymean_full,yhat_full)
+  out$cor_yhat_fitted=cor(ymean_fitted,yhat_fitted)
+  out$cor_yhat_predicted=cor(ymean_predicted,yhat_predicted)
+return(out)
+}
+
+
+
 
 
 summaryCor=function(VAR,ENV,realizedValue,predictedValue){

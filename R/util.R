@@ -159,7 +159,7 @@ summaryplot=function(IDL,IDE,realizedValue,postMean,LSvalue,plotdir,samps){
 setFW=function(g,b,h,y,VAR,ENV,...){
   eclipse=list(...)
   fitted.values=g[VAR]+(1+b[VAR])*h[ENV]
-  ENVmean=aggregate(dat$y,by=list(ENV),mean)
+  ENVmean=aggregate(y,by=list(ENV),mean)
   nameENVmean=ENVmean[,1]
   ENVmean=ENVmean[,2]
   names(ENVmean)=nameENVmean
@@ -167,7 +167,7 @@ setFW=function(g,b,h,y,VAR,ENV,...){
   corENVmean=cor(ENVmean,h)
   corfitted=cor(y,fitted.values)
   cor_ymean=get_cor_ymean(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV)
-  out=list(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,ENVmean=ENVmean,corENVmean=corENVmean,corfitted=corfitted,cor_ymean=cor_ymean,fitted.values=fitted.values)
+  out=list(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,ENVmean=ENVmean,corENVmean=corENVmean,corfitted=corfitted,cor_ymean=cor_ymean,fitted.values=fitted.values,mu=0)
   out=c(out,eclipse)	
   class(out)=c("FW","list")
   

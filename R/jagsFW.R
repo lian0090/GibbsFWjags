@@ -1,14 +1,22 @@
 ##this is the baysian implementation with rjags
-jagsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
+jagsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,ph=NULL,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
 n=length(y)
+
+
 IDEL=getIDEL(VAR,ENV,VARlevels,ENVlevels)
 IDE=IDEL$IDE
 IDL=IDEL$IDL
 VARlevels=IDEL$VARlevels
 ENVlevels=IDEL$ENVlevels
+if(is.null(ph)){
+  ph=0
+}else{
+  ph=ph[ENVlevels]
+  
+}
 ng=length(unique(IDL))
 nh=length(unique(IDE))
-data=list(y=y,ng=ng,nh=nh,n=n,IDL=IDL,IDE=IDE,
+data=list(y=y,ng=ng,n=n,IDL=IDL,IDE=IDE,
 Vy=var(y))
 if(is.null(Ainv)){
 modelfile="IaIb.txt"
@@ -31,10 +39,12 @@ for ( i in 1:ng){
 g[i] ~ dnorm(0,tau_g)
 b[i] ~ dnorm(0,tau_b)
    }
-   
-for (i in 1:nh){
- h[i]~ dnorm(0,tau_h)
-}       
+\n",   
+
+paste("h[",c(1:nh),"]", "~" ,"dnorm(", ph,",tau_h)\n",sep="")
+
+,
+"
 ##this should be priors, Bugs will use MCMC to sample from the unnormalized posteria.  
    mu ~ dunif(-1E-5,1E05)  
    tau_g ~ dgamma(dfg/2,Sg/2)
@@ -112,9 +122,9 @@ for(i in 1:nchain){
 	xi=samps[[i]][round(burnIn/thin):round(nIter/thin),,drop=F]
 	tmp=apply(xi,2,mean)
 	postMean=list()
-	h=tmp[paste("h[",1:data$nh,"]",sep="")]
-	b=tmp[paste("b[",1:data$ng,"]",sep="")]
-	g=tmp[paste("g[",1:data$ng,"]",sep="")]
+	h=tmp[paste("h[",1:nh,"]",sep="")]
+	b=tmp[paste("b[",1:ng,"]",sep="")]
+	g=tmp[paste("g[",1:ng,"]",sep="")]
   names(h)=ENVlevels
   names(g)=VARlevels
   names(b)=VARlevels

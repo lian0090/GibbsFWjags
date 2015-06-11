@@ -49,10 +49,10 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   h=rnorm(nh,0,sd=sqrt(var_h));
   e=rnorm(ng*nh*nrep,0,sd=sqrt(var_e));	
   #line effect
-  VAR=as.character(rep(c(1:ng),each=nh*nrep))
-  ENV=as.character(rep(rep(c(1:nh),each=nrep),ng))
+  VAR=paste("V",as.character(rep(c(1:ng),each=nh*nrep)),sep="")
+  ENV=paste("E",as.character(rep(rep(c(1:nh),each=nrep),ng)),sep="")
   
-  IDEL=getIDEL(VAR,ENV,VARlevels=NULL,ENVlevels=NULL)
+  IDEL=getIDEL(VAR,ENV,VARlevels=paste("V",1:ng,sep=""),ENVlevels=paste("E",1:nh,sep=""))
   IDE=IDEL$IDE
   IDL=IDEL$IDL
   VARlevels=IDEL$VARlevels
@@ -81,23 +81,29 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   if(ub=="halfENV"){
     #unbalanced data: divide ENV into high and low groups, 
     #first half lines in low environments, second five lines in high environments
-    lowE=as.integer(names(sort(h)[1:(nh/2)]))
-    highE=as.integer(names(sort(h)[(nh/2+1):nh]))
+    lowE=names(sort(h)[1:(nh/2)])
+    highE=names(sort(h)[(nh/2+1):nh])
     
-    for(i in 1:nh){
-      if(i %in% lowE) dat=dat[-which(dat$IDL%in%c(1:(ng/2)) & dat$IDE==i),]
-      else dat=dat[-which(dat$IDL%in%((ng/2+1):ng) & dat$IDE==i),]
+    for(ENVi in lowE){
+      dat=dat[-which(dat$IDL%in%((ng/2+1):ng) & dat$ENV==ENVi),]
+    
+    }
+    for(ENVi in highE){
+      dat=dat[-which(dat$IDL%in%c(1:(ng/2)) & dat$ENV==ENVi),]
     }
   }
   if(ub=="halfVAR"){
     #unbalanced data: divide VAR into high and low groups,
     # high half lines in first env group, low half lines in second  env group
-    lowG=as.integer(names(sort(g)[1:(ng/2)]))
-    highG=as.integer(names(sort(g)[(ng/2+1):ng]))
+    lowG=names(sort(g)[1:(ng/2)])
+    highG=names(sort(g)[(ng/2+1):ng])
     
-    for(i in 1:ng){
-      if(i %in% lowG) dat=dat[-which(dat$IDE%in%c(1:(nh/2)) & dat$IDL==i),]
-      else dat=dat[-which(dat$IDE%in%((nh/2+1):nh) & dat$IDL==i),]
+    for(VARi in lowG){
+     dat=dat[-which(dat$IDE%in%((nh/2+1):nh) & dat$VAR==VARi),]
+    
+    }
+    for(VARi in highG)  {
+      dat=dat[-which(dat$IDE%in%c(1:(nh/2)) & dat$VAR==VARi),]
     }
   }
   #randomly missing a porportion pro.missing of genotypes from each enrionment.

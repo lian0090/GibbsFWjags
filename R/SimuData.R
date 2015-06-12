@@ -84,7 +84,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runBalance=T,r
   if(runBalance==T) {
     balance.sum=fitmodel(y=y, VAR=VAR, ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
     colnames(balance.sum)=paste("balance",colnames(balance.sum),sep="_")
-  }
+  }else{balance.sum=NULL}
   if(! ub %in% c("halfENV","halfVAR","random")){
     stop("ub must be one of the mothods: halfENV, halfVAR, random")
   }	

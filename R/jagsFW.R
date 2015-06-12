@@ -1,7 +1,11 @@
 ##this is the baysian implementation with rjags
-jagsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,ph=NULL,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
+jagsFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,ph=NULL,df=5,dfg=5,dfh=5,dfb=5,S=NULL,Sg=NULL,Sb=NULL,Sh=NULL,Ainv=NULL,inits=NULL,nchain=1,burnIn=1000,nIter=5000,thin=1,savedir=".",seed=NULL,n.adapt=0){
 n=length(y)
-
+var_y=var(y)
+if(is.null(S)) S<-0.5*var_y*(df+2)  #S is the scale times df
+if(is.null(Sg))Sg<-0.25*var_y*(dfg+2)
+if(is.null(Sb))Sb<-0.5*sqrt(var_y)*(dfb+2)   
+if(is.null(Sh))Sh<-0.5*sqrt(var_y)*(dfh+2)  
 
 IDEL=getIDEL(VAR,ENV,VARlevels,ENVlevels)
 IDE=IDEL$IDE
@@ -16,46 +20,37 @@ if(is.null(ph)){
 }
 ng=length(unique(IDL))
 nh=length(unique(IDE))
-data=list(y=y,ng=ng,n=n,IDL=IDL,IDE=IDE,
-Vy=var(y))
+data=list(y=y,ng=ng,n=n,IDL=IDL,IDE=IDE)
 if(is.null(Ainv)){
-modelfile="IaIb.txt"
-cat("model
-{ 
-df<-5
-dfg<-5
-dfp<-5
-dfb<-5
-S<-0.5*Vy*(df+2)  
-Sg<-0.25*Vy*(dfg+2)
-Sb<-0.5*sqrt(Vy)*(dfb+2)  
-Sp<-0.5*sqrt(Vy)*(dfp+2)
-
-for (i in 1 : n) {
+  modelfile="IaIb.txt"
+  cat("model
+{ \n",
+      paste(c("df","dfg","dfh","dfb","S","Sg","Sb","Sh"),"<-",c(df,dfg,dfh,dfb,S,Sg,Sb,Sh),"\n",sep=""),
+      "
+      for (i in 1 : n) {
       y[i] ~ dnorm(mu+g[IDL[i]]+h[IDE[i]]*(1+b[IDL[i]]),tau_e)
       #theta[i]<-h[IDE[i]]*(1+b[IDL[i]])
       }
-for ( i in 1:ng){
-g[i] ~ dnorm(0,tau_g)
-b[i] ~ dnorm(0,tau_b)
-   }
-\n",   
+      for ( i in 1:ng){
+      g[i] ~ dnorm(0,tau_g)
+      b[i] ~ dnorm(0,tau_b)
+      }
+      \n",   
 
-paste("h[",c(1:nh),"]", "~" ,"dnorm(", ph,",tau_h)\n",sep="")
+paste("h[",c(1:nh),"]", "~" ,"dnorm(", ph,",tau_h)\n",sep=""),
 
-,
 "
 ##this should be priors, Bugs will use MCMC to sample from the unnormalized posteria.  
-   mu ~ dunif(-1E-5,1E05)  
-   tau_g ~ dgamma(dfg/2,Sg/2)
-   tau_b ~ dgamma(dfb/2,Sb/2)
-   tau_h ~ dgamma(dfp/2,Sp/2)
-   tau_e ~ dgamma(df/2,S/2)
+mu ~ dunif(-1E-5,1E05)  
+tau_g ~ dgamma(dfg/2,Sg/2)
+tau_b ~ dgamma(dfb/2,Sb/2)
+tau_h ~ dgamma(dfh/2,Sh/2)
+tau_e ~ dgamma(df/2,S/2)
 var_g <- 1/tau_g
 var_b<- 1/tau_b
 var_h<-1/tau_h
 var_e<-1/tau_e
-   }",file=modelfile)	
+}",file=modelfile)	
 }else{
 	data$Ainv=Ainv;
 	data$g0=rep(0,ng);

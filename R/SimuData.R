@@ -1,4 +1,14 @@
-fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
+getENVmean=function(y,ENV,ENVlevels){
+  ENVmean=aggregate(y,by=list(ENV),mean)
+  ENVname=ENVmean[,1]
+  ENVmean=ENVmean[,2]
+  names(ENVmean)=ENVname
+  ENVmean=ENVmean[ENVlevels]
+  ENVmean=ENVmean-mean(ENVmean)
+  return(ENVmean)
+}
+
+fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
   for(modeli in model){
     if(modeli=="lm"){
@@ -9,7 +19,7 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,bu
       }else
         if(modeli=="jags"){
           #jags will start sampling from the last member to the first member
-          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=rev(VARlevels),ENVlevels=rev(ENVlevels),Ainv=Ainv,burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
+          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=rev(VARlevels),ENVlevels=rev(ENVlevels),Ainv=Ainv,ph=ph[rev(ENVlevels)],burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
         }else{
           error("no model:",modeli)
         }
@@ -27,7 +37,7 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,A=NULL,Ainv=NULL,model,nIter,bu
 #########################################################
 #simulate data
 #########################################################
-SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL){
+SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
   #model can be jags, Gibbs, lm
   #parameters is a list with var_g,var_b,var_h,var_e,ng,nh,nrep,mu,and(or) A.
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
@@ -119,8 +129,15 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   if(!file.exists(file.path(savedir,ub))) dir.create(file.path(savedir,ub))
   save(dat,file=file.path(savedir,ub,"dat.rda"))
   
-  if(runModels==T) {		
-    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
+  if(runModels==T) {	
+    if(useph==T){
+      ph=getENVmean(dat$y,dat$ENV,ENVlevels)
+    }else{
+      ph=rep(0,nh)
+      names(ph)=ENVlevels
+    }
+    
+    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,ph=ph,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
                       colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
                       corr=cbind(balance.sum,ub.sum)	
                       save(corr,file=file.path(savedir,"corr.rda"))

@@ -37,7 +37,7 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,
 #########################################################
 #simulate data
 #########################################################
-SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
+SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runBalance=T,runUnbalance=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
   #model can be jags, Gibbs, lm
   #parameters is a list with var_g,var_b,var_h,var_e,ng,nh,nrep,mu,and(or) A.
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
@@ -81,7 +81,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
   if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))
   save(dat,file=file.path(savedir,"balance/dat.rda"))
-  if(runModels==T) {
+  if(runBalance==T) {
     balance.sum=fitmodel(y=y, VAR=VAR, ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
     colnames(balance.sum)=paste("balance",colnames(balance.sum),sep="_")
   }
@@ -129,7 +129,7 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runModels=T,bu
   if(!file.exists(file.path(savedir,ub))) dir.create(file.path(savedir,ub))
   save(dat,file=file.path(savedir,ub,"dat.rda"))
   
-  if(runModels==T) {	
+  if(runUnbalance==T) {	
     if(useph==T){
       ph=getENVmean(dat$y,dat$ENV,ENVlevels)
     }else{

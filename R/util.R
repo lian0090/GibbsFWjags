@@ -31,8 +31,8 @@ plot.FW=function(FWobj,plotVAR=NULL,main=NULL){
   sorth=sort(h)
   sorth1=sorth[seq(1,length(h),by=2)]
   sorth2=sorth[seq(2,length(h),by=2)]
-  axis(side=1,at=sorth1,labels=names(sorth1),line=1)
-  axis(side=3,at=sorth2,labels=names(sorth2),line=2)
+  axis(side=1,at=sorth1,labels=names(sorth1),line=1,las=2)
+  axis(side=3,at=sorth2,labels=names(sorth2),line=1,las=2)
   cols=NULL
   pchs=NULL
   for(i in 1:n.IDL){  
@@ -199,7 +199,7 @@ get_cor_ymean=function(g,b,h,y,VAR,ENV,corOnly=T){
   yhat=g[VAR]+(1+b[VAR])*h[ENV]
   return(cor(yhat,ymean))
 }
-partition_cor=function(FWobj,y_full,VAR_full,ENV_full,corOnly=T){
+groupMean_cor=function(FWobj,y_full,VAR_full,ENV_full,corOnly=T){
   out=list()
   g=FWobj$g
   b=FWobj$b
@@ -234,9 +234,9 @@ partition_cor=function(FWobj,y_full,VAR_full,ENV_full,corOnly=T){
   out$ymean_full=ymean_full
   out$yhat_full=yhat_full
   }
-  out$cor_yhat_full=cor(ymean_full,yhat_full)
-  out$cor_yhat_fitted=cor(ymean_fitted,yhat_fitted)
-  out$cor_yhat_predicted=cor(ymean_predicted,yhat_predicted)
+  corr=c(cor(ymean_full,yhat_full),cor(ymean_fitted,yhat_fitted),cor(ymean_predicted,yhat_predicted))
+  names(corr)=c("full","fitted","predicted")
+  out$corr=corr
 return(out)
 }
 

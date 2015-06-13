@@ -271,5 +271,14 @@ summaryCor=function(VAR,ENV,realizedValue,predictedValue){
 }
 
 
+getENVmean=function(y,ENV,ENVlevels){
+  ENVmean=aggregate(y,by=list(ENV),mean)
+  ENVname=ENVmean[,1]
+  ENVmean=ENVmean[,2]
+  names(ENVmean)=ENVname
+  ENVmean=ENVmean[ENVlevels]
+  ENVmean=ENVmean-mean(ENVmean)
+  return(ENVmean)
+}
 
 

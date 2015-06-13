@@ -1,12 +1,3 @@
-getENVmean=function(y,ENV,ENVlevels){
-  ENVmean=aggregate(y,by=list(ENV),mean)
-  ENVname=ENVmean[,1]
-  ENVmean=ENVmean[,2]
-  names(ENVmean)=ENVname
-  ENVmean=ENVmean[ENVlevels]
-  ENVmean=ENVmean-mean(ENVmean)
-  return(ENVmean)
-}
 
 fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
@@ -37,14 +28,18 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,
 #########################################################
 #simulate data
 #########################################################
-SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runBalance=T,runUnbalance=T,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
+
+SimuData=function(parameters,savedir,design="halfVAR",runModel=T,pro.missing=0.5,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
   #model can be jags, Gibbs, lm
   #parameters is a list with var_g,var_b,var_h,var_e,ng,nh,nrep,mu,and(or) A.
+  if(! design %in% c("balance","halfENV","halfVAR","random")){
+    stop("design must be one of the mothods: balance, halfENV, halfVAR, random")
+  }  
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
   for(i in 1:length(parameters)){
     assign(names(parameters)[i],parameters[[i]])
   }
-  if(!is.null(parameters$A)){	
+  if(!is.null(parameters$A)){  
     save(A,file=file.path(savedir,"A.rda"))
     g=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_g)
     b=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_b)
@@ -78,17 +73,15 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runBalance=T,r
   dat$IDL=IDL
   dat$IDE=IDE
   realizedValue=list(mu=mu,g=g,h=h,b=b,var_g=var(g),var_h=var(h),var_b=var(b),var_e=var(e))
+  if(!file.exists(savedir)) dir.create(savedir)
+     
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
-  if(!file.exists(file.path(savedir,"balance"))) dir.create(file.path(savedir,"balance"))
-  save(dat,file=file.path(savedir,"balance/dat.rda"))
-  if(runBalance==T) {
-    balance.sum=fitmodel(y=y, VAR=VAR, ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,A=A,Ainv=Ainv, nIter=nIter, burnIn=burnIn, thin=thin, model=model, seed=seed,savedir=file.path(savedir,"balance"),realizedValue=realizedValue)
-    colnames(balance.sum)=paste("balance",colnames(balance.sum),sep="_")
-  }else{balance.sum=NULL}
-  if(! ub %in% c("halfENV","halfVAR","random")){
-    stop("ub must be one of the mothods: halfENV, halfVAR, random")
-  }	
-  if(ub=="halfENV"){
+  
+  if(design!="balance"){
+    datfull=dat
+    save(datfull,file=file.path(savedir,"datfull.rda"))
+  }
+  if(design=="halfENV"){
     #unbalanced data: divide ENV into high and low groups, 
     #first half lines in low environments, second five lines in high environments
     lowE=names(sort(h)[1:(nh/2)])
@@ -96,52 +89,51 @@ SimuData=function(parameters,savedir,ub="halfVAR",pro.missing=0.5,runBalance=T,r
     
     for(ENVi in lowE){
       dat=dat[-which(dat$IDL%in%((ng/2+1):ng) & dat$ENV==ENVi),]
-    
+      
     }
     for(ENVi in highE){
       dat=dat[-which(dat$IDL%in%c(1:(ng/2)) & dat$ENV==ENVi),]
     }
   }
-  if(ub=="halfVAR"){
+  if(design=="halfVAR"){
     #unbalanced data: divide VAR into high and low groups,
     # high half lines in first env group, low half lines in second  env group
     lowG=names(sort(g)[1:(ng/2)])
     highG=names(sort(g)[(ng/2+1):ng])
     
     for(VARi in lowG){
-     dat=dat[-which(dat$IDE%in%((nh/2+1):nh) & dat$VAR==VARi),]
-    
+      dat=dat[-which(dat$IDE%in%((nh/2+1):nh) & dat$VAR==VARi),]
+      
     }
     for(VARi in highG)  {
       dat=dat[-which(dat$IDE%in%c(1:(nh/2)) & dat$VAR==VARi),]
     }
   }
   #randomly missing a porportion pro.missing of genotypes from each enrionment.
-  if(ub=="random"){
+  if(design=="random"){
     ng.remove=round(ng*pro.missing)
     for(i in 1:nh)dat=dat[-which((dat$IDL %in% sample(1:ng,ng.remove)) & dat$IDE==i),]			
   }
   ##
-  #if(ub=="reps"){
+  #if(design=="reps"){
   #  nrep.remove=round(nrep*pro.missing)
   #}
   
-  if(!file.exists(file.path(savedir,ub))) dir.create(file.path(savedir,ub))
-  save(dat,file=file.path(savedir,ub,"dat.rda"))
+
+  save(dat,file=file.path(savedir,"dat.rda"))
   
-  if(runUnbalance==T) {	
+  if(runModel==T) {	
     if(useph==T){
       ph=getENVmean(dat$y,dat$ENV,ENVlevels)
     }else{
       ph=rep(0,nh)
       names(ph)=ENVlevels
     }
-    
-    ub.sum=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,ph=ph,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=file.path(savedir,ub),realizedValue=realizedValue)
-                      colnames(ub.sum)=paste(ub,colnames(ub.sum),sep="_")		
-                      corr=cbind(balance.sum,ub.sum)	
-                      save(corr,file=file.path(savedir,"corr.rda"))
+    corr=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,ph=ph,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=savedir,realizedValue=realizedValue)
+    colnames(corr)=paste(design,colnames(corr),sep="_")		
+    save(corr,file=file.path(savedir,"corr.rda"))
   }		
+    
   return(corr)
 }
 

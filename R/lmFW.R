@@ -18,7 +18,7 @@ lmFW=function(y,VAR,ENV,VARlevels=NULL,ENVlevels=NULL,savedir="."){
   names(h)=ENVlevels
   LSvalue=setFW(g=g,b=b,h=h,y=y,VAR=VAR,ENV=ENV,IDL=IDL,IDE=IDE,VARlevels=VARlevels,ENVlevels=ENVlevels,mu=0) 
   class(LSvalue)=c("FW","list")
-  save(LSvalue,file=file.path(savedir,"LSvalue.RData"))
+  save(LSvalue,file=file.path(savedir,"LSvalue.rda"))
   return(LSvalue)
 }
 

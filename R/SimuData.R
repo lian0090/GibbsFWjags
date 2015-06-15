@@ -1,4 +1,118 @@
 
+
+summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
+  ghat=predictedValue$g
+  bhat=predictedValue$b
+  hhat=predictedValue$h
+  
+  g=realizedValue$g
+  b=realizedValue$b
+  h=realizedValue$h
+  
+  VARlevels=predictedValue$VARlevels
+  ENVlevels=predictedValue$ENVlevels
+  VAR_fitted=predictedValue$VAR
+  ENV_fitted=predictedValue$ENV
+  y_fitted=predictedValue$y
+  ymean_fitted=aggregate(y_fitted,by=list(VAR_fitted,ENV_fitted),mean)
+  colnames(ymean_fitted)=c("VAR","ENV","ymean")
+  ymean_full=aggregate(y_full,by=list(VAR_full,ENV_full),mean)
+   colnames(ymean_full)=c("VAR","ENV","ymean")
+
+  yhat_full=g[ymean_full$VAR]+(1+b[ymean_full$VAR])*h[ymean_full$ENV]
+  IDEL_full=paste(ymean_full$VAR,ymean_full$ENV,sep="_")
+  IDEL_fitted=paste(ymean_fitted$VAR,ymean_fitted$ENV,sep="_")
+
+  isfitted= (IDEL_full  %in% IDEL_fitted)
+  which_predicted=which(!isfitted)
+  which_fitted=which(isfitted)
+ 
+  
+  ymean_fitted=ymean_full[which_fitted,]
+  yhat_fitted=yhat_full[which_fitted]
+   
+   
+  corr1=rep(NA,3)
+  names(corr1)=c("ymean_yhat_full","ymean_yhat_fitted","ymean_yhat_predicted") 
+  corr1[1]=cor(ymean_full$ymean,yhat_full)
+  corr1[2]=cor(ymean_fitted$ymean,yhat_fitted)
+
+  	if(length(which_predicted)>0){
+	  ymean_predicted=ymean_full[which_predicted,]
+      yhat_predicted=yhat_full[which_predicted]
+      corr1[3]=cor(ymean_predicted$ymean,yhat_predicted)
+     }
+  
+  corr2=rep(NA,6)
+  #dat is a data.frame with the IDL and IDE combinations in the data set
+	corr2[1]=cor(b[VARlevels],bhat[VARlevels])
+    corr2[2]=cor(g[VARlevels],ghat[VARlevels])
+    corr2[3]=cor(h[ENVlevels],hhat[ENVlevels])
+    ENVmeanfitted=getENVmean(y_fitted,ENV_fitted,ENVlevels)
+    ENVmeanfull=getENVmean(y_fitted,ENV_full,ENVlevels)
+    corr2[4]=cor(h[ENVlevels],ENVmeanfitted)
+    corr2[5]=cor(h[ENVlevels],ENVmeanfull)
+    corr2[6]=cor(ENVmeanfitted,ENVmeanfull)
+    names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeanfitted","h_ENVmeanfull","ENVmeanfitted_ENVmeanfull")
+    
+  
+    corr3=rep(NA,3)
+    names(corr3)=c("ytrue_yhat_full","ytrue_yhat_fitted","ytrue_yhat_predicted")
+    corr3[1]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_full$VAR,ENV=ymean_full$ENV)
+    corr3[2]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_fitted$VAR,ENV=ymean_fitted$ENV)  
+	if(length(which_predicted)>0){
+	corr3[3]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_predicted$VAR,ENV=ymean_predicted$ENV) 
+	}
+	corr=c(corr1,corr2,corr3)
+	
+	return(corr)
+}
+
+
+getENVmean=function(y,ENV,ENVlevels){
+  ENVmean=aggregate(y,by=list(ENV),mean)
+  ENVname=ENVmean[,1]
+  ENVmean=ENVmean[,2]
+  names(ENVmean)=ENVname
+  ENVmean=ENVmean[ENVlevels]
+  ENVmean=ENVmean-mean(ENVmean)
+  return(ENVmean)
+}
+
+##function to produce summary correlations
+getyhat=function(Param,VAR,ENV){
+  VAR=as.character(VAR)
+  ENV=as.character(ENV)
+  ##only unique levels of IDL and IDE combinations are kept
+  yhat=data.frame(aggregate(Param$g[VAR]+(1+Param$b[VAR])*Param$h[ENV],by=list(VAR,ENV),mean))[,3]
+  if("mu" %in% names(Param)){yhat=yhat+Param$mu}
+  return(yhat)
+}
+
+corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
+	
+
+    return(cor(getyhat(Param1,VAR,ENV),getyhat(Param2,VAR,ENV)))
+
+}
+##
+get_cor_ymean=function(g,b,h,y,VAR,ENV,corOnly=T){
+  ymean=aggregate(y,by=list(VAR,ENV),mean)
+  VAR=ymean[,1]
+  ENV=ymean[,2]
+  ymean=ymean[,3]
+  yhat=g[VAR]+(1+b[VAR])*h[ENV]
+  return(cor(yhat,ymean))
+}
+
+
+
+
+
+
+
+
+
 fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
   for(modeli in model){

@@ -19,7 +19,7 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   ymean_full=aggregate(y_full,by=list(VAR_full,ENV_full),mean)
    colnames(ymean_full)=c("VAR","ENV","ymean")
 
-  yhat_full=g[ymean_full$VAR]+(1+b[ymean_full$VAR])*h[ymean_full$ENV]
+  yhat_full=ghat[ymean_full$VAR]+(1+bhat[ymean_full$VAR])*hhat[ymean_full$ENV]
   IDEL_full=paste(ymean_full$VAR,ymean_full$ENV,sep="_")
   IDEL_fitted=paste(ymean_fitted$VAR,ymean_fitted$ENV,sep="_")
 
@@ -48,12 +48,12 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
 	corr2[1]=cor(b[VARlevels],bhat[VARlevels])
     corr2[2]=cor(g[VARlevels],ghat[VARlevels])
     corr2[3]=cor(h[ENVlevels],hhat[ENVlevels])
-    ENVmeanfitted=getENVmean(y_fitted,ENV_fitted,ENVlevels)
-    ENVmeanfull=getENVmean(y_fitted,ENV_full,ENVlevels)
-    corr2[4]=cor(h[ENVlevels],ENVmeanfitted)
+    ENVmeantrain=getENVmean(y_fitted,ENV_fitted,ENVlevels)
+    ENVmeanfull=getENVmean(y_full,ENV_full,ENVlevels)
+    corr2[4]=cor(h[ENVlevels],ENVmeantrain)
     corr2[5]=cor(h[ENVlevels],ENVmeanfull)
-    corr2[6]=cor(ENVmeanfitted,ENVmeanfull)
-    names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeanfitted","h_ENVmeanfull","ENVmeanfitted_ENVmeanfull")
+    corr2[6]=cor(ENVmeantrain,ENVmeanfull)
+    names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeantrain","h_ENVmeanfull","ENVmeantrain_ENVmeanfull")
     
   
     corr3=rep(NA,3)
@@ -113,7 +113,7 @@ get_cor_ymean=function(g,b,h,y,VAR,ENV,corOnly=T){
 
 
 
-fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
+fitmodel=function(datfull,y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
   for(modeli in model){
     if(modeli=="lm"){
@@ -129,7 +129,7 @@ fitmodel=function(y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,
           error("no model:",modeli)
         }
     if(!is.null(realizedValue)){			
-      corr=cbind(corr,summaryCor(VAR,ENV,realizedValue,predictedValue));
+      corr=cbind(corr,summaryCor(datfull$y,datfull$VAR,datfull$ENV,realizedValue,predictedValue));
     }
   }
   colnames(corr)=model
@@ -190,9 +190,9 @@ SimuData=function(parameters,savedir,design="halfVAR",runModel=T,pro.missing=0.5
   if(!file.exists(savedir)) dir.create(savedir)
      
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
-  
+  datfull=dat
   if(design!="balance"){
-    datfull=dat
+    
     save(datfull,file=file.path(savedir,"datfull.rda"))
   }
   if(design=="halfENV"){
@@ -243,7 +243,7 @@ SimuData=function(parameters,savedir,design="halfVAR",runModel=T,pro.missing=0.5
       ph=rep(0,nh)
       names(ph)=ENVlevels
     }
-    corr=fitmodel(y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,ph=ph,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=savedir,realizedValue=realizedValue)
+    corr=fitmodel(datfull=datfull,y=dat$y,VAR=dat$VAR,ENV=dat$ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,ph=ph,A=A,Ainv=Ainv,model=model,nIter=nIter,burnIn=burnIn,thin=thin,seed=seed,savedir=savedir,realizedValue=realizedValue)
     colnames(corr)=paste(design,colnames(corr),sep="_")		
     save(corr,file=file.path(savedir,"corr.rda"))
   }		

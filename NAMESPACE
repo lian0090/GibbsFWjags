@@ -1,3 +1,2 @@
-useDynLib(GibbsFWjags,C_GibbsFW)
-export(GibbsFW,lmFW,jagsFW,RGibbsFW,summaryCor,SimuData,corYhat,summaryplot,initialize,fitmodel,getIDEL,setFW)
+exportPattern("^[^\\.]")
 

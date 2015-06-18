@@ -5,10 +5,11 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   bhat=predictedValue$b
   hhat=predictedValue$h
   
+  if(!missing(realizedValue)){
   g=realizedValue$g
   b=realizedValue$b
   h=realizedValue$h
-  
+  }
   VARlevels=predictedValue$VARlevels
   ENVlevels=predictedValue$ENVlevels
   VAR_fitted=predictedValue$VAR
@@ -43,19 +44,21 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
       corr1[3]=cor(ymean_predicted$ymean,yhat_predicted)
      }
   
+  ENVmeantrain=getENVmean(y_fitted,ENV_fitted,ENVlevels)
+  ENVmeanfull=getENVmean(y_full,ENV_full,ENVlevels)
+    
+
+  
+  if(!missing(realizedValue)){
   corr2=rep(NA,6)
   #dat is a data.frame with the IDL and IDE combinations in the data set
 	corr2[1]=cor(b[VARlevels],bhat[VARlevels])
     corr2[2]=cor(g[VARlevels],ghat[VARlevels])
     corr2[3]=cor(h[ENVlevels],hhat[ENVlevels])
-    ENVmeantrain=getENVmean(y_fitted,ENV_fitted,ENVlevels)
-    ENVmeanfull=getENVmean(y_full,ENV_full,ENVlevels)
     corr2[4]=cor(h[ENVlevels],ENVmeantrain)
     corr2[5]=cor(h[ENVlevels],ENVmeanfull)
     corr2[6]=cor(ENVmeantrain,ENVmeanfull)
     names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeantrain","h_ENVmeanfull","ENVmeantrain_ENVmeanfull")
-    
-  
     corr3=rep(NA,3)
     names(corr3)=c("ytrue_yhat_full","ytrue_yhat_fitted","ytrue_yhat_predicted")
     corr3[1]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_full$VAR,ENV=ymean_full$ENV)
@@ -63,6 +66,15 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
 	if(length(which_predicted)>0){
 	corr3[3]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_predicted$VAR,ENV=ymean_predicted$ENV) 
 	}
+    }else{
+    	corr2=cor(ENVmeantrain,ENVmeanfull)
+    	names(corr2)="ENVmeantrain_ENVmeanfull"
+    	corr3=NULL
+    	}
+       
+    
+  
+    
 	corr=c(corr1,corr2,corr3)
 	
 	return(corr)
@@ -96,14 +108,6 @@ corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
 
 }
 ##
-get_cor_ymean=function(g,b,h,y,VAR,ENV,corOnly=T){
-  ymean=aggregate(y,by=list(VAR,ENV),mean)
-  VAR=ymean[,1]
-  ENV=ymean[,2]
-  ymean=ymean[,3]
-  yhat=g[VAR]+(1+b[VAR])*h[ENV]
-  return(cor(yhat,ymean))
-}
 
 
 

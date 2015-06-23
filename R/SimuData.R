@@ -1,4 +1,4 @@
-
+require(GibbsFW)
 
 summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   ghat=predictedValue$g
@@ -59,13 +59,16 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
     corr2[5]=cor(h[ENVlevels],ENVmeanfull)
     corr2[6]=cor(ENVmeantrain,ENVmeanfull)
     names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeantrain","h_ENVmeanfull","ENVmeantrain_ENVmeanfull")
-    corr3=rep(NA,3)
-    names(corr3)=c("ytrue_yhat_full","ytrue_yhat_fitted","ytrue_yhat_predicted")
+    corr3=rep(NA,4)
+    names(corr3)=c("ytrue_yhat_full","ytrue_yhat_fitted","ytrue_yhat_predicted","ytrue_ymean_full")
     corr3[1]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_full$VAR,ENV=ymean_full$ENV)
     corr3[2]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_fitted$VAR,ENV=ymean_fitted$ENV)  
 	if(length(which_predicted)>0){
 	corr3[3]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_predicted$VAR,ENV=ymean_predicted$ENV) 
 	}
+	##correlation between ymean and ytrue, so what we can see which is a better thing to use represent correct yhat
+	corr3[4]=cor(ymean_full$ymean,getyhat(Param=list(g=g,b=b,h=h),VAR=ymean_full$VAR,ENV=ymean_full$ENV))
+	
     }else{
     	corr2=cor(ENVmeantrain,ENVmeanfull)
     	names(corr2)="ENVmeantrain_ENVmeanfull"
@@ -147,23 +150,18 @@ fitmodel=function(datfull,y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NUL
 #simulate data
 #########################################################
 
-SimuData=function(parameters,savedir,design="halfVAR",runModel=T,pro.missing=0.5,burnIn=1000,nIter=5000,thin=thin,model,seed=NULL,useph=T){
+SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NULL,savedir,design="halfVAR",runModel=T,pro.missing=0.5,burnIn=3000,nIter=5000,thin=5,model,seed=NULL,useph=F){
   #model can be jags, Gibbs, lm
-  #parameters is a list with var_g,var_b,var_h,var_e,ng,nh,nrep,mu,and(or) A.
-  if(! design %in% c("balance","halfENV","halfVAR","random")){
-    stop("design must be one of the mothods: balance, halfENV, halfVAR, random")
+  if(! design %in% c("balance","halfENV","halfVAR","randomE",'randomG')){
+    stop("design must be one of the mothods: balance, halfENV, halfVAR, randomE, randomG")
   }  
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
-  for(i in 1:length(parameters)){
-    assign(names(parameters)[i],parameters[[i]])
-  }
-  if(!is.null(parameters$A)){  
+  if(!is.null(A)){  
     save(A,file=file.path(savedir,"A.rda"))
     g=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_g)
     b=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_b)
     if("jags"%in%model){Ainv=solve(A);save(Ainv,file=file.path(savedir,"Ainv.rda"))}
   }else{	
-    A=NULL
     Ainv=NULL
     g=rnorm(ng,0,sd=sqrt(var_g))
     b=rnorm(ng,0,sd=sqrt(var_b))
@@ -228,9 +226,16 @@ SimuData=function(parameters,savedir,design="halfVAR",runModel=T,pro.missing=0.5
     }
   }
   #randomly missing a porportion pro.missing of genotypes from each enrionment.
-  if(design=="random"){
+  if(design=="randomG"){
     ng.remove=round(ng*pro.missing)
     for(i in 1:nh)dat=dat[-which((dat$IDL %in% sample(1:ng,ng.remove)) & dat$IDE==i),]			
+  }
+  
+    #randomly missing a porportion pro.missing of environments from each genotype.
+  if(design=="randomE"){
+    nh.remove=round(nh*pro.missing)
+    if(nh.remove<1)nh.remove=1
+   for(i in 1:ng)dat=dat[-which((dat$ENV %in% ENVlevels[sample(1:nh,nh.remove)]) & (dat$VAR==VARlevels[i])),]
   }
   ##
   #if(design=="reps"){

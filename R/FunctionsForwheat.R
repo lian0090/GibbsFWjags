@@ -60,10 +60,12 @@ if(!missing(G)){
 corr3=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm2.2)
 
 }else{
-	corr3=NULL
+	corr3=rep(NA,4)
 	}
 corr1=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm1.1)
 corr2=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm2.1)
-return(rbind(corr1,corr2,corr3))
+corr=rbind(corr1,corr2,corr3)
+rownames(corr)=c("lm","Gibbs","GibbsV")
+return(corr)
 	
 }

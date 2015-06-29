@@ -24,7 +24,7 @@ subsetVAR=function(VAR,ENV,y,n.subsetVAR,seed,G){
    return(out)	
 }
 
-sample.missing=function(VAR,ENV,y,pro.missing,seed,G){
+sample.missing=function(VAR,ENV,y,pro.missing,seed,G,savedir){
 	##VAR should be a vector or character specifying the name of VAR in data
 	##ENV should be a vector or character specifying the name of ENV in data
 	##y should be a vector or character specifying the name of y in the data
@@ -33,8 +33,8 @@ if(!missing(seed)){
 }
 VAR=as.character(VAR)
 ENV=as.character(ENV)
-data=cbind(VAR,ENV,y,stringsAsFactors=F)
-data$y=as.numeric(y)
+dat=data.frame(cbind(VAR=VAR,ENV=ENV,y=y),stringsAsFactors=F)
+dat$y=as.numeric(y)
 nobs=length(y)
 VARlevels=unique(VAR)
 ng=length(VARlevels)
@@ -45,7 +45,7 @@ nh=length(ENVlevels)
 nh.remove=round(nh*pro.missing)
 if(nh.remove<1)nh.remove=1
 
-data_select=data
+data_select=dat
  
  
  
@@ -56,14 +56,14 @@ data_select=data
 lm1.1=lmFW(data_select$y,data_select$VAR,data_select$ENV,savedir=savedir)
 lm2.1=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,savedir=savedir)$Init1
 if(!missing(G)){
-	lm2.2=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,VARlevels=colnames(G),A=G)$Init1
-corr3=summaryCor(data$y,data$VAR,data$ENV,predictedValue=lm2.2)
+	lm2.2=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,VARlevels=colnames(G),A=G,savedir=savedir)$Init1
+corr3=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm2.2)
 
 }else{
 	corr3=NULL
 	}
-corr1=summaryCor(data$y,data$VAR,data$ENV,predictedValue=lm1.1)
-corr2=summaryCor(data$y,data$VAR,data$ENV,predictedValue=lm2.1)
+corr1=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm1.1)
+corr2=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm2.1)
 return(rbind(corr1,corr2,corr3))
 	
 }

@@ -47,12 +47,14 @@ if(nh.remove<1)nh.remove=1
 
 data_select=data
  
+ 
+ 
  for(i in 1:ng){
  	data_select=data_select[-which((data_select$ENV %in% ENVlevels[sample(1:nh,nh.remove)]) & (data_select$VAR==VARlevels[i])),]			
  	}
  
-lm1.1=lmFW(data_select$y,data_select$VAR,data_select$ENV)
-lm2.1=GibbsFW(data_select$y,data_select$VAR,data_select$ENV)$Init1
+lm1.1=lmFW(data_select$y,data_select$VAR,data_select$ENV,savedir=savedir)
+lm2.1=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,savedir=savedir)$Init1
 if(!missing(G)){
 	lm2.2=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,VARlevels=colnames(G),A=G)$Init1
 corr3=summaryCor(data$y,data$VAR,data$ENV,predictedValue=lm2.2)

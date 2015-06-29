@@ -1,4 +1,5 @@
 require(GibbsFW)
+require(lme4)
 
 summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   ghat=predictedValue$g
@@ -7,8 +8,11 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   
   if(!missing(realizedValue)){
   g=realizedValue$g
-  b=realizedValue$b
   h=realizedValue$h
+  if(trueModel=="FW"){
+  b=realizedValue$b
+  }
+  
   }
   VARlevels=predictedValue$VARlevels
   ENVlevels=predictedValue$ENVlevels
@@ -52,7 +56,9 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
   if(!missing(realizedValue)){
   corr2=rep(NA,6)
   #dat is a data.frame with the IDL and IDE combinations in the data set
+	if(trueModel=="FW"){
 	corr2[1]=cor(b[VARlevels],bhat[VARlevels])
+	}else{corr2[1]=NA}
     corr2[2]=cor(g[VARlevels],ghat[VARlevels])
     corr2[3]=cor(h[ENVlevels],hhat[ENVlevels])
     corr2[4]=cor(h[ENVlevels],ENVmeantrain)
@@ -61,23 +67,25 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
     names(corr2)=c("b_bhat","g_ghat","h_hhat","h_ENVmeantrain","h_ENVmeanfull","ENVmeantrain_ENVmeanfull")
     corr3=rep(NA,4)
     names(corr3)=c("ytrue_yhat_full","ytrue_yhat_fitted","ytrue_yhat_predicted","ytrue_ymean_full")
-    corr3[1]= corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_full$VAR,ENV=ymean_full$ENV)
-    corr3[2]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_fitted$VAR,ENV=ymean_fitted$ENV)  
+    trueGxE=realizedValue$trueGxE
+    corr3[1]= cor(trueGxE[paste(ymean_full$VAR,ymean_full$ENV,sep=":"),"t"],getyhat(predictedValue,VAR=ymean_full$VAR,ENV=ymean_full$ENV))
+
+    corr3[2]=cor(trueGxE[paste(ymean_fitted$VAR,ymean_fitted$ENV,sep=":"),"t"],getyhat(predictedValue,VAR=ymean_fitted$VAR,ENV=ymean_fitted$ENV))
+    
 	if(length(which_predicted)>0){
-	corr3[3]=corYhat(Param1=realizedValue,Param2=predictedValue,VAR=ymean_predicted$VAR,ENV=ymean_predicted$ENV) 
+	corr3[3]=cor(trueGxE[paste(ymean_predicted$VAR,ymean_predicted$ENV,sep=":"),"t"],getyhat(predictedValue,VAR=ymean_predicted$VAR,ENV=ymean_predicted$ENV))
 	}
 	##correlation between ymean and ytrue, so what we can see which is a better thing to use represent correct yhat
-	corr3[4]=cor(ymean_full$ymean,getyhat(Param=list(g=g,b=b,h=h),VAR=ymean_full$VAR,ENV=ymean_full$ENV))
+	corr3[4]=cor(ymean_full$ymean,trueGxE[paste(ymean_full$VAR,ymean_full$ENV,sep=":"),"t"])
 	
     }else{
     	corr2=cor(ENVmeantrain,ENVmeanfull)
     	names(corr2)="ENVmeantrain_ENVmeanfull"
     	corr3=NULL
     	}
-       
-    
-  
-    
+   ##correlation between phenotype ajustments and true genotype     
+        
+         
 	corr=c(corr1,corr2,corr3)
 	
 	return(corr)
@@ -99,9 +107,8 @@ getyhat=function(Param,VAR,ENV){
   VAR=as.character(VAR)
   ENV=as.character(ENV)
   ##only unique levels of IDL and IDE combinations are kept
-  yhat=data.frame(aggregate(Param$g[VAR]+(1+Param$b[VAR])*Param$h[ENV],by=list(VAR,ENV),mean))[,3]
-  if("mu" %in% names(Param)){yhat=yhat+Param$mu}
-  return(yhat)
+  yhat=Param$g[VAR]+(1+Param$b[VAR])*Param$h[ENV]
+    return(yhat)
 }
 
 corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
@@ -150,7 +157,7 @@ fitmodel=function(datfull,y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NUL
 #simulate data
 #########################################################
 
-SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NULL,savedir,design="halfVAR",runModel=T,pro.missing=0.5,burnIn=3000,nIter=5000,thin=5,model,seed=NULL,useph=F){
+SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NULL,savedir,design="halfVAR",runModel=T,pro.missing=0.5,burnIn=3000,nIter=5000,thin=5,model,trueModel="FW",seed=NULL,useph=F){
   #model can be jags, Gibbs, lm
   if(! design %in% c("balance","halfENV","halfVAR","randomE",'randomG')){
     stop("design must be one of the mothods: balance, halfENV, halfVAR, randomE, randomG")
@@ -159,15 +166,22 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
   if(!is.null(A)){  
     save(A,file=file.path(savedir,"A.rda"))
     g=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_g)
+    if(trueModel=="FW"){
     b=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_b)
+    }else{b=NA}
     if("jags"%in%model){Ainv=solve(A);save(Ainv,file=file.path(savedir,"Ainv.rda"))}
   }else{	
     Ainv=NULL
     g=rnorm(ng,0,sd=sqrt(var_g))
-    b=rnorm(ng,0,sd=sqrt(var_b))
+    if(trueModel=="FW"){
+    	b=rnorm(ng,0,sd=sqrt(var_b))
+    	}else{b=NA}
   }
   
   h=rnorm(nh,0,sd=sqrt(var_h));
+  if(trueModel=="Normal"){
+  	o=rnorm(ng*nh,0,sd=sqrt(var_g*var_h))
+  }else{o=NA}
   e=rnorm(ng*nh*nrep,0,sd=sqrt(var_e));	
   #line effect
   VAR=paste("V",as.character(rep(c(1:ng),each=nh*nrep)),sep="")
@@ -180,15 +194,24 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
   ENVlevels=IDEL$ENVlevels
   names(g)=VARlevels
   names(h)=ENVlevels
-  names(b)=VARlevels
+  trueGxE=expand.grid(VAR=VARlevels,ENV=ENVlevels)
+  rownames(trueGxE)=paste(trueGxE$VAR,trueGxE$ENV,sep=":")
+  if(trueModel=="FW"){
+  names(b)=VARlevels	
+  trueGxE$t=mu+g[trueGxE$VAR]+(1+b[trueGxE$VAR])*h[trueGxE$ENV]
   y=mu+g[IDL]+h[IDE]+b[IDL]*h[IDE]+e
-  
+  }
+  if(trueModel=="Normal"){
+  	 names(o)=rownames(trueGxE)
+  	 trueGxE$t=mu+g[trueGxE$VAR]+h[trueGxE$ENV]+o
+  	 y=mu+g[VAR]+h[ENV]+o[paste(VAR,ENV,sep=":")]+e
+  }
   dat=data.frame(y)
   dat$VAR=VAR
   dat$ENV=ENV
   dat$IDL=IDL
   dat$IDE=IDE
-  realizedValue=list(mu=mu,g=g,h=h,b=b,var_g=var(g),var_h=var(h),var_b=var(b),var_e=var(e))
+  realizedValue=list(mu=mu,g=g,h=h,b=b,o=o,var_g=var(g),var_h=var(h),var_b=var(b),var_e=var(e),trueGxE=trueGxE)
   if(!file.exists(savedir)) dir.create(savedir)
      
   save(realizedValue,file=file.path(savedir,"realizedValue.rda"))
@@ -231,7 +254,7 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
     for(i in 1:nh)dat=dat[-which((dat$IDL %in% sample(1:ng,ng.remove)) & dat$IDE==i),]			
   }
   
-    #randomly missing a porportion pro.missing of environments from each genotype.
+    #randomly missing a porportion pro.missing of environments from each variety.
   if(design=="randomE"){
     nh.remove=round(nh*pro.missing)
     if(nh.remove<1)nh.remove=1

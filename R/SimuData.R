@@ -170,7 +170,9 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
     }else{
     	b=NA
     	}
-    if("jags"%in%model){Ainv=solve(A);save(Ainv,file=file.path(savedir,"Ainv.rda"))}
+    if("jags"%in%model){
+    	Ainv=solve(A);
+    	}else{Ainv=NULL}
   }else{	
     Ainv=NULL
     g=rnorm(ng,0,sd=sqrt(var_g))

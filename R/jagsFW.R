@@ -52,7 +52,7 @@ var_h<-1/tau_h
 var_e<-1/tau_e
 }",file=modelfile)	
 }else{
-	data$Ainv=Ainv;
+	data$Ainv=Ainv[VARlevels,VARlevels];
 	data$g0=rep(0,ng);
 	data$b0=rep(0,ng);
 	modelfile="CaCb.txt"
@@ -87,9 +87,9 @@ for (i in 1:nh){
    tau_e ~ dgamma(df/2,S/2)
    
    var_g <- 1/tau_g
-var_b<- 1/tau_b
-var_h<-1/tau_h
-var_e<-1/tau_e
+   var_b<- 1/tau_b
+   var_h<-1/tau_h
+   var_e<-1/tau_e
    }
 ',file=modelfile)
 	}

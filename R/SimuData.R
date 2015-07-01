@@ -164,18 +164,21 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
   }  
   if(!file.exists(savedir))dir.create(savedir,recursive=T)
   if(!is.null(A)){  
-    save(A,file=file.path(savedir,"A.rda"))
     g=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_g)
     if(trueModel=="FW"){
     b=mvrnorm(n=1,mu=rep(0,ng),Sigma=A*var_b)
-    }else{b=NA}
+    }else{
+    	b=NA
+    	}
     if("jags"%in%model){Ainv=solve(A);save(Ainv,file=file.path(savedir,"Ainv.rda"))}
   }else{	
     Ainv=NULL
     g=rnorm(ng,0,sd=sqrt(var_g))
     if(trueModel=="FW"){
     	b=rnorm(ng,0,sd=sqrt(var_b))
-    	}else{b=NA}
+    	}else{
+    		b=NA
+    		}
   }
   
   h=rnorm(nh,0,sd=sqrt(var_h));
@@ -194,6 +197,16 @@ SimuData=function(nh=10,ng=10,nrep=2,mu=100,var_g=1,var_h=1,var_b=1,var_e=2,A=NU
   ENVlevels=IDEL$ENVlevels
   names(g)=VARlevels
   names(h)=ENVlevels
+  if(!is.null(A)){
+  	colnames(A)=rownames(A)=VARlevels 
+    save(A,file=file.path(savedir,"A.rda"))
+    }
+  if(!is.null(Ainv)){
+  	colnames(Ainv)=rownames(Ainv)=VARlevels 
+    save(Ainv,file=file.path(savedir,"Ainv.rda"))
+  }  
+  
+  
   trueGxE=expand.grid(VAR=VARlevels,ENV=ENVlevels)
   rownames(trueGxE)=paste(trueGxE$VAR,trueGxE$ENV,sep=":")
   if(trueModel=="FW"){

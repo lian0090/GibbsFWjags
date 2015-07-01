@@ -84,9 +84,10 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
     	corr3=NULL
     	}
    ##correlation between phenotype ajustments and true genotype     
-        
+    corr4=predictedValue$corENVmean
+    names(corr4)="hhat_ENVmeatrain"  
          
-	corr=c(corr1,corr2,corr3)
+	corr=c(corr1,corr2,corr3,corr4)
 	
 	return(corr)
 }
@@ -129,22 +130,40 @@ corYhat=function(Param1=NULL,Param2=NULL,VAR,ENV){
 
 fitmodel=function(datfull,y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NULL,model,nIter,burnIn,thin,seed=NULL,savedir=".",realizedValue=NULL){
   corr=NULL
-  for(modeli in model){
+  
+  for(i in 1:length(model) ){
+  	modeli=model[i]
+  	savediri=file.path(savedir,modeli)
+  	if(! (modeli %in% c("lm","GibbsV","GibbsNoV","jags"))){
+  		 error("no model:",modeli)
+  		 }
+        
     if(modeli=="lm"){
-      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels,savedir=savedir)
-    }else
-      if(modeli=="Gibbs"){
-        predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savedir)[[1]];
-      }else
-        if(modeli=="jags"){
-          #jags will start sampling from the last member to the first member
-          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=rev(VARlevels),ENVlevels=rev(ENVlevels),Ainv=Ainv,ph=ph[rev(ENVlevels)],burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savedir)[[1]];
-        }else{
-          error("no model:",modeli)
-        }
-    if(!is.null(realizedValue)){			
-      corr=cbind(corr,summaryCor(datfull$y,datfull$VAR,datfull$ENV,realizedValue,predictedValue));
+      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels,savedir=savediri)
+      
     }
+    if (modeli=="GibbsV"){
+      if(is.null(A)){   
+ 	   predictedValue=NULL
+ 	 }else{
+   predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savediri)[[1]];	
+ 	 }
+ 	}
+ 	if (modeli=="GibbsNoV"){
+ 	 predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=NULL,seed=seed,savedir=savediri)[[1]];	
+ 		
+ 	}
+    
+ if(modeli=="jags"){
+          #jags will start sampling from the last member to the first member
+          predictedValue = jagsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=rev(VARlevels),ENVlevels=rev(ENVlevels),Ainv=Ainv,ph=ph[rev(ENVlevels)],burnIn=burnIn,nIter=nIter,thin=thin,n.adapt=0,seed=seed,savedir=savediri)[[1]];
+        }
+    if(!is.null(realizedValue) & !is.null(predictedValue)){
+    	corri=summaryCor(datfull$y,datfull$VAR,datfull$ENV,realizedValue,predictedValue)
+    }else{
+    	corri=NA
+    }
+      corr=cbind(corr,corri)
   }
   colnames(corr)=model
   return(corr)

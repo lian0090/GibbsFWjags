@@ -56,7 +56,7 @@ data_select=dat
 lm1.1=lmFW(data_select$y,data_select$VAR,data_select$ENV,savedir=file.path(savedir,"lm"))
 lm2.1=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,savedir=file.path(savedir,"GibbsNoV"))$Init1
 if(!missing(G)){
-	lm2.2=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,VARlevels=colnames(G),A=G,savedir=savedir,"GIbbsV")$Init1
+	lm2.2=GibbsFW(data_select$y,data_select$VAR,data_select$ENV,VARlevels=colnames(G),A=G,savedir=file.path(savedir,"GibbsV"))$Init1
 corr3=summaryCor(dat$y,dat$VAR,dat$ENV,predictedValue=lm2.2)
 
 }else{

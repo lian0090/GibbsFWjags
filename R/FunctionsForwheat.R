@@ -18,10 +18,11 @@ subsetVAR=function(VAR,ENV,y,n.subsetVAR,seed,G){
    out$y=y
    if(!missing(G)){
 	G=G[VARselect,VARselect]
-	return(list(dat=out,G=G))	
+	dat=out
+	return(list(dat=dat,G=G))	
  }else{
-  	G=G[VARselect,VARselect]
-	return(list(dat=out))
+ 	dat=out
+  		return(list(dat=dat))
   }
   
    

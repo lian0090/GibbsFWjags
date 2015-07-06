@@ -13,15 +13,18 @@ subsetVAR=function(VAR,ENV,y,n.subsetVAR,seed,G){
    VAR=VAR[whselect]
    ENV=ENV[whselect]
    y=y[whselect]
-   if(!missing(G)){
-	G=G[VARselect,VARselect]
-	out$G=G
-  }
    out$VAR=VAR
    out$ENV=ENV
    out$y=y
-
-   return(out)	
+   if(!missing(G)){
+	G=G[VARselect,VARselect]
+	return(list(dat=out,G=G))	
+ }else{
+  	G=G[VARselect,VARselect]
+	return(list(dat=out))
+  }
+  
+   
 }
 
 sample.missing=function(VAR,ENV,y,pro.missing,seed,G,savedir){

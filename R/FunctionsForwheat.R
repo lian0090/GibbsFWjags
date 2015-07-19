@@ -62,9 +62,9 @@ save(dat,file=file.path(savedir,"dat.rda"))
 
 if(runModels==T){
 lm1.1=lmFW(dat$y,dat$VAR,dat$ENV,savedir=file.path(savedir,"lm"))
-lm2.1=GibbsFW(dat$y,dat$VAR,dat$ENV,savedir=file.path(savedir,"GibbsNoV"))$Init1
+lm2.1=GibbsFW(dat$y,dat$VAR,dat$ENV,savedir=file.path(savedir,"GibbsNoV"))
 if(!missing(G)){
-	lm2.2=GibbsFW(dat$y,dat$VAR,dat$ENV,VARlevels=colnames(G),A=G,savedir=file.path(savedir,"GibbsV"))$Init1
+	lm2.2=GibbsFW(dat$y,dat$VAR,dat$ENV,VARlevels=colnames(G),A=G,savedir=file.path(savedir,"GibbsV"))
 corr3=summaryCor(datfull$y,datfull$VAR,datfull$ENV,predictedValue=lm2.2)
 
 }else{

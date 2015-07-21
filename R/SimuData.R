@@ -1,4 +1,4 @@
-require(GibbsFW)
+require(FW)
 require(lme4)
 
 summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
@@ -136,18 +136,18 @@ fitmodel=function(datfull,y,VAR,ENV,VARlevels, ENVlevels,ph=NULL,A=NULL,Ainv=NUL
   		 }
         
     if(modeli=="lm"){
-      predictedValue=lmFW(y,VAR,ENV,VARlevels,ENVlevels,savedir=savediri)
+      predictedValue=FW(y,VAR,ENV,VARlevels,ENVlevels,saveAt=savediri,method="OLS")
       
     }
     if (modeli=="GibbsV"){
       if(is.null(A)){   
  	   predictedValue=NULL
  	 }else{
-   predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,savedir=savediri)[[1]];	
+   predictedValue=FW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=A,seed=seed,saveAt=savediri,method='Gibbs')[[1]];	
  	 }
  	}
  	if (modeli=="GibbsNoV"){
- 	 predictedValue=GibbsFW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=NULL,seed=seed,savedir=savediri)[[1]];	
+ 	 predictedValue=FW(y=y,VAR=VAR,ENV=ENV,VARlevels=VARlevels,ENVlevels=ENVlevels,nIter=nIter,burnIn=burnIn,thin=thin,A=NULL,seed=seed,saveAt=savediri,method='Gibbs')[[1]];	
  		
  	}
     

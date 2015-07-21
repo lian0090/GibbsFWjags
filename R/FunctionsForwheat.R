@@ -61,15 +61,16 @@ save(datfull,file=file.path(savedir,"datfull.rda"))
 save(dat,file=file.path(savedir,"dat.rda"))
 
 if(runModels==T){
-lm1.1=lmFW(dat$y,dat$VAR,dat$ENV,savedir=file.path(savedir,"lm"))
-lm2.1=GibbsFW(dat$y,dat$VAR,dat$ENV,savedir=file.path(savedir,"GibbsNoV"))
-if(!missing(G)){
-	lm2.2=GibbsFW(dat$y,dat$VAR,dat$ENV,VARlevels=colnames(G),A=G,savedir=file.path(savedir,"GibbsV"))
-corr3=summaryCor(datfull$y,datfull$VAR,datfull$ENV,predictedValue=lm2.2)
+lm1.1=FW(dat$y,dat$VAR,dat$ENV,method="OLS")
+lm2.1=FW(dat$y,dat$VAR,dat$ENV,saveAt=file.path(savedir,"GibbsI"),method="Gibbs")
 
-}else{
-	corr3=rep(NA,4)
+	if(!missing(G)){
+		lm2.2=FW(dat$y,dat$VAR,dat$ENV,A=G,saveAt=file.path(savedir,"GibbsA"),method="Gibbs")
+		corr3=summaryCor(datfull$y,datfull$VAR,datfull$ENV,predictedValue=lm2.2)
+	}else{
+	corr3=rep(NA,3)
 	}
+	
 corr1=summaryCor(datfull$y,datfull$VAR,datfull$ENV,predictedValue=lm1.1)
 corr2=summaryCor(datfull$y,datfull$VAR,datfull$ENV,predictedValue=lm2.1)
 corr=rbind(corr1,corr2,corr3)

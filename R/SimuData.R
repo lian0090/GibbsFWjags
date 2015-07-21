@@ -83,11 +83,8 @@ summaryCor=function(y_full,VAR_full,ENV_full,realizedValue,predictedValue){
     	names(corr2)="ENVmeantrain_ENVmeanfull"
     	corr3=NULL
     	}
-   ##correlation between phenotype ajustments and true genotype     
-    corr4=predictedValue$corENVmean
-    names(corr4)="hhat_ENVmeatrain"  
-         
-	corr=c(corr1,corr2,corr3,corr4)
+            
+	corr=c(corr1,corr2,corr3)
 	
 	return(corr)
 }
